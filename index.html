@@ -273,6 +273,7 @@ textarea.inp{min-height:88px;resize:vertical;line-height:1.5}
 .box svg{width:15px;height:15px}
 .t-title{font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
 .t-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.t-meta .pill svg{width:12px;height:12px;stroke-width:3}
 .t-body{flex:1;min-width:0}
 .t-why{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.45}
 .t-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
@@ -299,7 +300,10 @@ textarea.inp{min-height:88px;resize:vertical;line-height:1.5}
 .doc-ico{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--sound-2);color:var(--sound)}
 .doc-ico svg{width:19px;height:19px}
 .doc-item b{display:block;font-size:15px;font-weight:600;letter-spacing:-.012em;line-height:1.25}
-.doc-item .small{margin-top:3px;font-size:12.5px}
+.doc-item.is-done{background:#F6FAF6;border-color:#CFE3D3}
+.doc-item.is-done .doc-ico{background:#E2F0E5;color:var(--ok)}
+.doc-item .pill svg{width:12px;height:12px;stroke-width:3}
+.doc-item .small{display:block;margin-top:3px;font-size:12.5px}
 .reader{font-family:var(--read);font-size:17px;line-height:1.62;color:#1B2724}
 .reader h3{font-family:var(--ui);font-size:17px;margin:26px 0 9px;letter-spacing:-.015em}
 .reader h3:first-child{margin-top:6px}
@@ -2277,18 +2281,35 @@ const BLANK = {
 let S = JSON.parse(JSON.stringify(BLANK));
 let storeOK = true;
 
+const STORE_KEY = 'firstday:record:v3';
+/* Three tiers: the artifact storage API when it exists, the browser's own
+   storage when the app is hosted, and memory only as a last resort. */
+async function readStore(){
+  try{ const r = await window.storage.get(STORE_KEY); if(r && r.value) return r.value; }catch(e){}
+  try{ const v = localStorage.getItem(STORE_KEY); if(v) return v; }catch(e){}
+  return null;
+}
+async function writeStore(v){
+  try{ await window.storage.set(STORE_KEY, v); return true; }catch(e){}
+  try{ localStorage.setItem(STORE_KEY, v); return true; }catch(e){}
+  return false;
+}
+async function clearStore(){
+  try{ await window.storage.delete(STORE_KEY); }catch(e){}
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+}
 async function load(){
   try{
-    const r = await window.storage.get('firstday:record');
-    if(r && r.value){ S = Object.assign(JSON.parse(JSON.stringify(BLANK)), JSON.parse(r.value)); }
-  }catch(e){ /* no saved record yet, or storage unavailable */ }
+    const v = await readStore();
+    if(v) S = Object.assign(JSON.parse(JSON.stringify(BLANK)), JSON.parse(v));
+  }catch(e){ S = JSON.parse(JSON.stringify(BLANK)); }
 }
 let saveTimer;
 function save(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{ await window.storage.set('firstday:record', JSON.stringify(S)); }
-    catch(e){ if(storeOK){ storeOK=false; console.warn('Storage unavailable — this session only.'); } }
+  saveTimer = setTimeout(async () => {
+    const ok = await writeStore(JSON.stringify(S));
+    if(!ok && storeOK){ storeOK = false; console.warn('Storage unavailable — this session only.'); }
   }, 250);
 }
 
@@ -2515,18 +2536,18 @@ function viewWelcome(){
         <div style="display:inline-block">${markSVG(76,'var(--fir)','#fff','w')}</div>
         <p class="small" style="margin:14px 0 0;font-weight:600;color:var(--fir-3)">Seattle Animal Shelter</p>
         <h1 style="margin-top:6px;font-size:30px">The whole folder, on your phone.</h1>
-        <p class="lede" style="margin-top:12px">All nine pages the shelter reviews with you, your pet's history, a plan for the first year, and the coupons — with nothing to print and nothing to lose.</p>
+        <p class="lede" style="margin-top:12px">Every page the shelter reviews with you, your pet's history, a plan for the first year, and the coupons — with nothing to print and nothing to lose.</p>
       </div>
 
       <div class="stack" style="margin-top:24px">
         <button class="btn" data-a="start">Start the handoff${S.pet.shelterName?` for ${esc(S.pet.shelterName)}`:''}</button>
-        <button class="btn btn-2" data-a="browse">${ICON.book}<span>Just show me the nine documents</span></button>
+        <button class="btn btn-2" data-a="browse">${ICON.book}<span>Just show me the documents</span></button>
         ${S.started ? `<button class="btn btn-3" data-a="resume">Open the record I already made</button>` : ''}
       </div>
 
-      <div class="sec-head"><h2>What is in the folder</h2><span class="small num">${reviewed}/${REVIEW.length} reviewed</span></div>
+      <div class="sec-head"><h2>What is in the folder</h2><span class="small num">${reviewed} of ${REVIEW.length} reviewed</span></div>
       <div class="stack">${DOCS.map(docRow).join('')}</div>
-      <p class="small" style="margin-top:12px">Tap any page to read it now. Each one has a tick box at the bottom so you can mark it off as the shelter rep goes through it with you.</p>
+      <p class="small" style="margin-top:12px">Tap any page to read it now. Each one has a tick box at the bottom — mark it off as the shelter rep goes through it and a Reviewed tag appears here.</p>
 
       <div class="qr-wrap" style="margin-top:26px">
         ${qrSVG(qrPayload(), 240)}
@@ -2571,10 +2592,10 @@ function stepPet(){
   ${!p.id ? `<button class="btn btn-2" data-a="demo" style="margin-bottom:18px">${ICON.qr}<span>Fill from a sample shelter record</span></button>` : ''}
   <div class="card">
     <div class="grid-2">
-      <label class="f"><span>Shelter name</span><input class="inp" data-f="pet.shelterName" value="${esc(p.shelterName)}" placeholder="Yuzu"></label>
-      <label class="f"><span>Animal ID</span><input class="inp" data-f="pet.id" value="${esc(p.id)}" placeholder="A0061338302"></label>
+      <label class="f"><span>Shelter name</span><input class="inp" data-f="pet.shelterName" value="${esc(p.shelterName)}" placeholder="Name on the shelter sheet"></label>
+      <label class="f"><span>Animal ID</span><input class="inp" data-f="pet.id" value="${esc(p.id)}" placeholder="A0000000000"></label>
     </div>
-    <label class="f"><span>Microchip number</span><input class="inp" data-f="pet.microchip" value="${esc(p.microchip)}" inputmode="numeric" placeholder="941000032283309"></label>
+    <label class="f"><span>Microchip number</span><input class="inp" data-f="pet.microchip" value="${esc(p.microchip)}" inputmode="numeric" placeholder="15 digits"></label>
     <div class="grid-2">
       <label class="f"><span>Species</span><select class="inp" data-f="pet.species"><option ${p.species==='Cat'?'selected':''}>Cat</option><option ${p.species==='Dog'?'selected':''}>Dog</option><option ${p.species==='Other'?'selected':''}>Other</option></select></label>
       <label class="f"><span>Age</span><input class="inp" data-f="pet.age" value="${esc(p.age)}" placeholder="3 months"></label>
@@ -2739,7 +2760,7 @@ function viewReview(){
       <span class="small num">${done}/${REVIEW.length}</span>
     </div></div>
   <div class="screen"><div class="pad">
-    <p class="lede" style="margin:4px 0 16px">The shelter rep goes through each page with you. Tick them off as you go — this replaces the signature sheet in the folder.</p>
+    <p class="lede" style="margin:4px 0 16px">The shelter rep goes through each page with you. Tick them off as you go and a Reviewed tag appears on that page everywhere in the app. This replaces the signature sheet in the folder.</p>
     <div class="prog" style="margin-bottom:20px"><i style="width:${pct}%"></i></div>
 
     <div class="stack">
@@ -2747,13 +2768,14 @@ function viewReview(){
         <button class="box" data-ack="${k}" aria-pressed="${S.acks[k]}" aria-label="Mark ${esc(label)} reviewed">${S.acks[k]?ICON.check:''}</button>
         <div class="t-body">
           <div class="t-title">${esc(label)}</div>
+          ${S.acks[k]?`<div class="t-meta"><span class="pill pill-ok">${ICON.check}Reviewed</span></div>`:''}
           <div class="t-act">${doc
             ? `<button data-doc="${doc}">${ICON.book}<span>Open the page</span></button>`
             : k==='r1' ? `<button data-a="torecord">${ICON.file}<span>Open the record</span></button>`
             : `<button data-a="toperks">${ICON.gift}<span>Open the coupons</span></button>`}</div>
         </div></div>`).join('')}
     </div>
-    ${!all?`<button class="btn btn-3 btn-s" data-a="ackall" style="width:100%;margin-top:12px">Mark all nine reviewed</button>`:''}
+    ${!all?`<button class="btn btn-3 btn-s" data-a="ackall" style="width:100%;margin-top:12px">Mark all ${REVIEW.length} reviewed</button>`:''}
 
     <div class="sec-head"><h2>Your confirmation</h2></div>
     <div class="sig ${S.adopter.confirmedAt?'signed':''}">
@@ -2763,9 +2785,9 @@ function viewReview(){
           <p class="small" style="margin:5px 0 0">${esc(S.owner.name||'Adopter')} · ${fmtDateTime(new Date(S.adopter.confirmedAt))}</p></div>
         </div>
         <button class="btn btn-3 btn-s" data-a="unconfirm" style="margin-top:10px">Undo</button>`
-      : `<p class="small" style="margin:0 0 12px">Confirm that all nine pages were reviewed with you and that you have received them.</p>
+      : `<p class="small" style="margin:0 0 12px">Confirm that every page was reviewed with you and that you have received them.</p>
          ${!S.owner.name?`<label class="f"><span>Your name</span><input class="inp" data-f="owner.name" placeholder="Adopter name"></label>`:''}
-         <button class="btn btn-s" data-a="confirm" style="width:100%" ${all&&S.owner.name?'':'disabled'}>${ICON.check}<span>${all?'I have received all nine':`${REVIEW.length-done} still to review`}</span></button>`}
+         <button class="btn btn-s" data-a="confirm" style="width:100%" ${all&&S.owner.name?'':'disabled'}>${ICON.check}<span>${all?'I have received everything':`${REVIEW.length-done} still to review`}</span></button>`}
     </div>
 
     <div class="sec-head"><h2>Shelter sign-off</h2></div>
@@ -2783,7 +2805,7 @@ function viewReview(){
     </div>
 
     ${S.staff.signedAt && S.adopter.confirmedAt ? `<div class="eco" style="margin-top:22px">
-      <b style="font-size:15px">Nine sheets that did not get printed</b>
+      <b style="font-size:15px">A folder that did not get printed</b>
       <p class="small" style="margin:6px 0 0">That is the whole folder, for this adoption, on a device the adopter already owns and will still have in a year.</p></div>` : ''}
     <div class="pad-b"></div>
   </div></div>`;
@@ -2950,9 +2972,15 @@ function tabCare(){
   <div class="screen"><div class="pad">${list}<div class="pad-b"></div></div></div>`;
 }
 function docRow(d){
-  return `<button class="doc-item" data-doc="${d.id}">
+  const rev = REVIEW.find(r => r[2] === d.id);
+  const done = rev && S.acks[rev[0]];
+  return `<button class="doc-item ${done?'is-done':''}" data-doc="${d.id}">
     <span class="doc-ico">${ICON[d.icon]||ICON.book}</span>
-    <span style="flex:1;min-width:0"><b>${esc(d.title)}</b><span class="small">${esc(d.sub)} · ${d.mins} min read</span></span>
+    <span style="flex:1;min-width:0">
+      <b>${esc(d.title)}</b>
+      <span class="small">${esc(d.sub)} · ${d.mins} min read</span>
+      ${done?`<span class="pill pill-ok" style="margin-top:7px">${ICON.check}Reviewed</span>`:''}
+    </span>
     <span style="color:var(--muted);width:16px;flex:none">${ICON.chev}</span></button>`;
 }
 
@@ -3213,7 +3241,7 @@ function tabRecord(){
     <button class="card" data-a="review" style="width:100%;text-align:left">
       <div class="row-between">
         <div style="flex:1">
-          <b style="font-size:15px">${ackDone===REVIEW.length?'All nine pages reviewed':'Review together'}</b>
+          <b style="font-size:15px">${ackDone===REVIEW.length?'Every page reviewed':'Review together'}</b>
           <p class="small" style="margin:5px 0 0">${S.adopter.confirmedAt?`Receipt confirmed by ${esc(S.owner.name||'the adopter')}.`:'Everything that used to be in the manila folder.'} ${S.staff.signedAt?`Signed off by ${esc(S.staff.name)}.`:'Not yet signed off.'}</p>
         </div>
         <span style="color:var(--muted);width:16px;flex:none">${ICON.chev}</span>
@@ -3406,7 +3434,7 @@ document.addEventListener('click', e => {
   if(a.check){ S.tasks[a.check] = !S.tasks[a.check]; save(); render();
     if(S.tasks[a.check]) toast(TASKS.filter(x=>S.tasks[x.id]).length===TASKS.length ? 'Every item done. Nicely handled.' : 'Done'); return; }
   if(a.ack){ S.acks[a.ack] = !S.acks[a.ack]; save(); render();
-    if(S.acks[a.ack] && REVIEW.every(([k])=>S.acks[k])) toast('All nine pages reviewed'); return; }
+    if(S.acks[a.ack] && REVIEW.every(([k])=>S.acks[k])) toast('Every page reviewed'); return; }
   if(a.set){ setPath(a.set, a.val); render(); return; }
   if(a.ics){
     const task = TASKS.find(x=>x.id===a.ics); const d = dueDate(task.due); d.setHours(10,0,0,0);
@@ -3422,12 +3450,13 @@ document.addEventListener('click', e => {
       if(!S.adoptedAt) S.adoptedAt = Date.now();
       S.started = true; S.screen='app'; S.tab='care'; S.careCat='All'; save(); render(); break;
     case 'demo':
-      /* Sample record, transcribed from a real Seattle Animal Shelter profile sheet */
-      Object.assign(S.pet, { shelterName:'Yuzu', name:'', id:'A0061338302', microchip:'941000032283309',
+      /* A clearly fictional sample so the prototype can be demonstrated without
+         publishing anyone's real animal ID or microchip number. */
+      Object.assign(S.pet, { shelterName:'Sample', name:'', id:'A0000000000', microchip:'000000000000000',
         species:'Cat', age:'3 months', sex:'Male, altered', weight:'1 kg', breed:'Domestic Shorthair Mix',
         color:'Orange/White', altered:'yes', rabies:'no',
-        story:'Yuzu came into the shelter a bit banged up and scared, and it took time and a lot of Churu to calm him down — a very tiny guy who had clearly been through an ordeal before someone scooped him into safety. Within hours in foster care he turned curious and brave. He was hungry, thirsty, dirty, and had no idea what toys were. He is now a friendly, silly, clean kitten who races around chasing toys, soaking up sunbeams, prowling the back of the couch and sneaking up on the resident adult cats for any attention they will give him. He won both of them over, and he is very good at reading their signals while encouraging them to love on him.' });
-      save(); render(); toast('Sample shelter record loaded'); break;
+        story:'Sample record for demonstration only — no real animal. Replace every field with the details from the shelter profile sheet. This is where the foster carer\'s notes go: how the animal arrived, what they were like at first, and what they are like now. It is the part that disappears when paperwork gets lost.' });
+      save(); render(); toast('Sample record loaded — replace with real details'); break;
     case 'next':
       if(S.step < 4){ S.step++; render(); $('.screen').scrollTop=0; }
       break;
@@ -3461,7 +3490,7 @@ document.addEventListener('click', e => {
     case 'baseurl': sheetEdit('base'); break;
     case 'savesheet': closeSheet(); render(); toast('Saved'); break;
     case 'closesheet': closeSheet(); break;
-    case 'ackall': REVIEW.forEach(([k])=>S.acks[k]=true); save(); render(); toast('All nine marked reviewed'); break;
+    case 'ackall': REVIEW.forEach(([k])=>S.acks[k]=true); save(); render(); toast('All '+REVIEW.length+' marked reviewed'); break;
     case 'sign':
       if(!S.staff.name) return;
       S.staff.signedAt = Date.now(); save(); render(); toast('Sign-off recorded'); break;
@@ -3479,7 +3508,7 @@ document.addEventListener('click', e => {
         </div>`); break;
     case 'reset2':
       S = JSON.parse(JSON.stringify(BLANK));
-      try{ window.storage.delete('firstday:record'); }catch(err){}
+      clearStore();
       closeSheet(); render(); toast('Cleared'); break;
   }
 });
