@@ -1,0 +1,3524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D5350">
+<title>First Day — Seattle Animal Shelter adoption record</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="First Day">
+<meta name="description" content="Everything the Seattle Animal Shelter reviews with new adopters, in one place.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   FIRST DAY — design tokens
+   Palette drawn from the Seattle Animal Shelter mark (green tree,
+   blue dog + cat) and PNW materials: fir, Puget Sound, wet paper.
+   ============================================================ */
+:root{
+  /* Seattle Animal Shelter: deep teal from the shelter's banners, the blue
+     of the cat in their logo, the green of the tree, and their signal yellow. */
+  --fir:#0D5350;
+  --fir-2:#116B66;
+  --fir-3:#1C8079;
+  --leaf:#5FA544;
+  --sound:#1B75BB;
+  --sound-2:#E4EFF8;
+  --paper:#F1F4EF;
+  --card:#FFFFFF;
+  --ink:#14201D;
+  --ink-2:#3A4A45;
+  --muted:#66766F;
+  --line:#DCE3DA;
+  --line-2:#EAEFE7;
+  --marigold:#F0B429;
+  --marigold-2:#FEF3D8;
+  --rust:#B4522A;
+  --rust-2:#FBEAE1;
+  --ginger:#E49B41;
+  --ok:#3C8B4E;
+
+  --r-s:8px; --r-m:14px; --r-l:22px; --r-xl:30px;
+  --shadow-lift:0 1px 2px rgba(15,61,51,.06), 0 8px 24px -12px rgba(15,61,51,.28);
+  --shadow-sheet:0 -8px 40px -16px rgba(15,61,51,.4);
+
+  --ui:'Bricolage Grotesque', 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --read:'Newsreader', 'Source Serif 4', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+
+  --app-w:460px;
+  --nav-h:0px;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--ui);
+  background:#D8E0D7;
+  color:var(--ink);
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+a{color:var(--sound);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--sound);outline-offset:2px;border-radius:4px}
+img{max-width:100%;display:block}
+/* Icons are 24x24 viewBox with no intrinsic size; give them one. */
+svg:not([width]){width:20px;height:20px;flex:none}
+
+/* ---------- desk / phone frame ---------- */
+#desk{
+  min-height:100dvh;display:flex;align-items:stretch;justify-content:center;
+  background:
+    radial-gradient(1100px 620px at 50% -10%, #F4F7F2 0%, #D8E0D7 60%, #C6D2C5 100%);
+}
+#app{
+  width:100%;max-width:var(--app-w);background:var(--paper);
+  position:relative;display:flex;flex-direction:column;
+  min-height:100dvh;overflow:hidden;
+}
+@media (min-width:900px){
+  #desk{padding:26px 0}
+  #app{
+    min-height:min(920px,calc(100dvh - 52px));max-height:calc(100dvh - 52px);
+    border-radius:36px;box-shadow:0 40px 90px -40px rgba(15,61,51,.55), 0 0 0 1px rgba(15,61,51,.08);
+  }
+}
+
+/* ---------- scroll region ---------- */
+.screen{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.screen::-webkit-scrollbar{width:6px}
+.screen::-webkit-scrollbar-thumb{background:#C6D0C4;border-radius:3px}
+.pad{padding:0 18px}
+.pad-b{padding-bottom:26px}
+
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.018em;line-height:1.16}
+h1{font-size:29px;font-weight:700;letter-spacing:-.028em}
+h2{font-size:21px}
+h3{font-size:16.5px}
+p{margin:0 0 12px}
+.lede{font-size:16px;color:var(--ink-2);line-height:1.5}
+.small{font-size:13.5px;color:var(--muted);line-height:1.45}
+.tiny{font-size:12px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:26px 0 12px}
+.sec-head h2{font-size:18px}
+.sec-head .small{flex:none}
+
+/* ---------- header ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;flex:none;background:var(--paper);
+  padding:calc(env(safe-area-inset-top) + 12px) 18px 12px;
+  border-bottom:1px solid transparent;transition:border-color .2s, background .2s;
+}
+.topbar.stuck{border-bottom-color:var(--line);background:rgba(239,242,236,.94);backdrop-filter:blur(10px)}
+.topbar-row{display:flex;align-items:center;gap:12px;min-height:34px}
+.topbar h1{font-size:24px;flex:1;min-width:0}
+.back{
+  width:34px;height:34px;flex:none;border-radius:50%;background:var(--card);
+  border:1px solid var(--line);display:grid;place-items:center;color:var(--fir);
+}
+.back svg{width:19px;height:19px}
+.back:active{transform:scale(.94)}
+
+/* ---------- cards ---------- */
+.card{background:var(--card);border-radius:var(--r-l);border:1px solid var(--line-2);padding:16px}
+.card-flat{background:var(--card);border-radius:var(--r-m);border:1px solid var(--line-2);padding:14px}
+.row{display:flex;gap:12px;align-items:center}
+.row-between{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:10px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ---------- buttons ---------- */
+.btn{
+  text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:14px 20px;border-radius:999px;font-weight:600;font-size:15.5px;
+  background:var(--fir);color:#fff;width:100%;transition:transform .12s ease, filter .12s ease;
+  letter-spacing:-.01em;
+}
+.btn:active{transform:scale(.975);filter:brightness(1.08)}
+.btn svg{width:19px;height:19px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn-2{background:var(--card);color:var(--fir);border:1.5px solid var(--line)}
+.btn-3{background:transparent;color:var(--fir);padding:12px 14px}
+.btn-gold{background:var(--marigold);color:#3A2708}
+.btn-s{padding:9px 15px;font-size:13.5px;width:auto}
+.btn-row{display:flex;gap:9px}
+.btn-row .btn{width:auto;flex:1}
+
+/* ---------- form ---------- */
+label.f{display:block;margin-bottom:14px}
+label.f > span{display:block;font-size:13.5px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.inp{
+  width:100%;padding:13px 14px;border-radius:var(--r-m);border:1.5px solid var(--line);
+  background:var(--card);font-size:16px;transition:border-color .15s, box-shadow .15s;
+}
+.inp:focus{outline:0;border-color:var(--sound);box-shadow:0 0 0 3px var(--sound-2)}
+textarea.inp{min-height:88px;resize:vertical;line-height:1.5}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+/* choice tiles */
+.choice{
+  display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  padding:15px;border-radius:var(--r-m);border:1.5px solid var(--line);background:var(--card);
+  transition:border-color .14s, background .14s;
+}
+.choice[aria-pressed="true"]{border-color:var(--fir);background:#F4F8F3;box-shadow:inset 0 0 0 1px var(--fir)}
+.choice .tick{
+  width:21px;height:21px;flex:none;border-radius:50%;border:2px solid var(--line);margin-top:1px;
+  display:grid;place-items:center;color:#fff;
+}
+.choice[aria-pressed="true"] .tick{background:var(--fir);border-color:var(--fir)}
+.choice .tick svg{width:13px;height:13px}
+.choice b{display:block;font-size:15px;font-weight:600}
+.choice em{font-style:normal;font-size:13px;color:var(--muted);display:block;margin-top:2px;line-height:1.4}
+
+/* ---------- pills / chips ---------- */
+.pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;
+  font-size:12.5px;font-weight:600;background:var(--line-2);color:var(--ink-2);white-space:nowrap;
+}
+.pill-gold{background:var(--marigold-2);color:#7A5210}
+.pill-rust{background:var(--rust-2);color:var(--rust)}
+.pill-ok{background:#E4F1EA;color:var(--ok)}
+.pill-blue{background:var(--sound-2);color:#1D5470}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 18px 2px;scrollbar-width:none;-ms-overflow-style:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;padding:9px 15px;border-radius:999px;background:var(--card);border:1px solid var(--line);
+  font-size:13.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;transition:all .14s;
+}
+.chip[aria-pressed="true"]{background:var(--fir);border-color:var(--fir);color:#fff}
+
+/* ---------- pinned top nav, present at every stage ---------- */
+#root{flex:1;display:flex;flex-direction:column;min-height:0}
+.nav{
+  flex:none;z-index:50;display:flex;
+  padding-top:env(safe-area-inset-top);
+  background:rgba(255,255,255,.95);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.nav button{
+  flex:1;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;color:var(--muted);font-size:9.5px;font-weight:600;letter-spacing:.005em;
+  padding:9px 2px 8px;min-width:0;
+}
+.nav button svg{width:21px;height:21px}
+.nav button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nav button[aria-current="page"]{color:var(--fir)}
+.nav button[aria-current="page"]::after{
+  content:"";position:absolute;left:22%;right:22%;bottom:0;height:2.5px;
+  border-radius:3px 3px 0 0;background:var(--fir);
+}
+.nav .dot{
+  position:absolute;top:7px;margin-left:17px;width:7px;height:7px;border-radius:50%;
+  background:var(--marigold);border:1.5px solid #fff;
+}
+
+/* ---------- pet header card ---------- */
+.pet-hero{
+  position:relative;border-radius:var(--r-xl);overflow:hidden;background:var(--fir);
+  color:#fff;padding:18px;box-shadow:var(--shadow-lift);
+}
+.pet-hero::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(340px 200px at 88% -20%, rgba(240,180,41,.30), transparent 70%);
+}
+.pet-hero .row{position:relative;z-index:1}
+.avatar{
+  width:74px;height:74px;flex:none;border-radius:20px;object-fit:cover;background:var(--fir-3);
+  border:2.5px solid rgba(255,255,255,.35);
+}
+.avatar-ph{display:grid;place-items:center;color:rgba(255,255,255,.72)}
+.avatar-ph svg{width:32px;height:32px}
+.pet-hero h2{font-size:25px;letter-spacing:-.03em}
+.pet-hero .small{color:rgba(255,255,255,.78)}
+.daycount{
+  position:relative;z-index:1;margin-top:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,.18);
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+.daycount b{font-size:15px;font-weight:600}
+
+/* ---------- quick actions ---------- */
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa a,.qa button{
+  display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 4px 11px;
+  background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);
+  font-size:11px;font-weight:600;color:var(--ink-2);text-align:center;text-decoration:none;line-height:1.25;
+}
+.qa svg{width:21px;height:21px;color:var(--fir)}
+.qa .urgent svg{color:var(--rust)}
+
+/* ---------- task list ---------- */
+.task{
+  display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--card);
+  border:1px solid var(--line-2);border-radius:var(--r-m);text-align:left;width:100%;
+  transition:opacity .2s;
+}
+.task.done{opacity:.55}
+.task.done .t-title{text-decoration:line-through;text-decoration-color:var(--muted)}
+.box{
+  width:24px;height:24px;flex:none;border-radius:8px;border:2px solid var(--line);
+  display:grid;place-items:center;color:#fff;transition:all .16s;margin-top:1px;
+}
+.task.done .box{background:var(--ok);border-color:var(--ok)}
+.box svg{width:15px;height:15px}
+.t-title{font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+.t-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.t-body{flex:1;min-width:0}
+.t-why{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+.t-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+.t-act a,.t-act button{
+  font-size:12.5px;font-weight:600;padding:8px 13px;border-radius:999px;
+  background:var(--line-2);color:var(--fir);text-decoration:none;display:inline-flex;gap:6px;align-items:center;
+}
+.t-act svg{width:14px;height:14px}
+.phase{
+  display:flex;align-items:center;gap:10px;margin:24px 0 11px;
+}
+.phase h3{font-size:15px;letter-spacing:-.005em}
+.phase .line{flex:1;height:1px;background:var(--line)}
+
+/* ---------- progress ---------- */
+.prog{height:9px;border-radius:99px;background:var(--line-2);overflow:hidden}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--fir-3),var(--leaf),var(--marigold));border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+
+/* ---------- doc reader ---------- */
+.doc-item{
+  display:flex;gap:13px;align-items:center;width:100%;text-align:left;padding:15px 14px;
+  background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);
+}
+.doc-ico{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--sound-2);color:var(--sound)}
+.doc-ico svg{width:19px;height:19px}
+.doc-item b{display:block;font-size:15px;font-weight:600;letter-spacing:-.012em;line-height:1.25}
+.doc-item .small{margin-top:3px;font-size:12.5px}
+.reader{font-family:var(--read);font-size:17px;line-height:1.62;color:#1B2724}
+.reader h3{font-family:var(--ui);font-size:17px;margin:26px 0 9px;letter-spacing:-.015em}
+.reader h3:first-child{margin-top:6px}
+.reader p{margin:0 0 15px}
+.reader ul{margin:0 0 15px;padding-left:20px}
+.reader li{margin-bottom:9px}
+.reader strong{font-weight:600}
+.callout{
+  font-family:var(--ui);font-size:14.5px;line-height:1.5;padding:14px 15px;border-radius:var(--r-m);
+  background:var(--marigold-2);border-left:3px solid var(--marigold);margin:0 0 16px;color:#4A3208;
+}
+.callout.blue{background:var(--sound-2);border-left-color:var(--sound);color:#1B4257}
+.callout b{font-weight:700}
+.srcline{
+  font-family:var(--ui);font-size:12.5px;color:var(--muted);line-height:1.5;
+  padding:13px 14px;background:var(--line-2);border-radius:var(--r-m);margin-top:22px;
+}
+
+/* zone cards (body language) */
+.zone{border-radius:var(--r-m);padding:14px;margin-bottom:11px;font-family:var(--ui)}
+.zone-g{background:#E7F1E9;border-left:4px solid #2F7D5E}
+.zone-y{background:#FBF1DC;border-left:4px solid var(--marigold)}
+.zone-r{background:#FAE7DE;border-left:4px solid var(--rust)}
+.zone h4{font-size:14.5px;margin-bottom:5px}
+.zone p{font-size:13.5px;line-height:1.5;margin:0 0 9px;color:var(--ink-2)}
+.zone dl{margin:0;font-size:13px;line-height:1.5}
+.zone dt{font-weight:700;margin-top:8px}
+.zone dd{margin:0;color:var(--ink-2)}
+
+/* ---------- directory ---------- */
+.dir{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);padding:15px}
+.dir b{font-size:15px;font-weight:600;letter-spacing:-.012em;display:block;line-height:1.3}
+.dir .addr{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+.dir-act{display:flex;gap:8px;margin-top:12px}
+.dir-act a{
+  flex:1;text-align:center;padding:10px;border-radius:10px;background:var(--fir);color:#fff;
+  font-size:13.5px;font-weight:600;text-decoration:none;display:inline-flex;gap:7px;align-items:center;justify-content:center;
+}
+.dir-act a.alt{background:var(--line-2);color:var(--fir)}
+.dir-act svg{width:15px;height:15px}
+.dir.urgent{border-color:#F0CDBC;background:#FEF7F3}
+
+/* ---------- perks ---------- */
+.perk{border-radius:var(--r-l);padding:16px;border:1px solid var(--line-2);background:var(--card);position:relative;overflow:hidden}
+.perk .code{
+  font-family:var(--ui);font-weight:700;letter-spacing:.09em;font-size:17px;
+  background:var(--paper);border:1.5px dashed var(--line);border-radius:10px;
+  padding:11px;text-align:center;margin-top:12px;
+}
+.perk-strip{height:5px;margin:-16px -16px 14px;background:linear-gradient(90deg,var(--fir-3),var(--leaf),var(--marigold))}
+
+/* ---------- record rows ---------- */
+.rec{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line-2);font-size:14.5px}
+.rec:last-child{border-bottom:0}
+.rec dt{color:var(--muted);flex:none;font-size:13.5px}
+.rec dd{margin:0;font-weight:600;text-align:right;word-break:break-word}
+
+/* ---------- QR ---------- */
+.qr-wrap{
+  background:var(--card);border-radius:var(--r-xl);padding:20px;border:1px solid var(--line-2);
+  box-shadow:var(--shadow-lift);
+}
+.qr-wrap svg{width:100%;height:auto;display:block}
+
+/* ---------- setup progress ---------- */
+.steps{display:flex;gap:5px;padding:0 18px 4px}
+.steps i{flex:1;height:4px;border-radius:99px;background:var(--line);transition:background .3s}
+.steps i.on{background:var(--fir)}
+
+/* ---------- celebration ---------- */
+#celebrate{
+  position:absolute;inset:0;z-index:60;background:var(--fir);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:34px 26px;overflow:hidden;
+}
+#celebrate .burst{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.conf{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;opacity:0;will-change:transform}
+@keyframes fall{
+  0%{opacity:0;transform:translate3d(0,-10px,0) rotate(0)}
+  8%{opacity:1}
+  100%{opacity:0;transform:translate3d(var(--dx),108vh,0) rotate(var(--rot))}
+}
+.cel-in{position:relative;z-index:2;max-width:330px}
+.cel-badge{
+  width:120px;height:120px;margin:0 auto 22px;border-radius:34px;background:rgba(255,255,255,.1);
+  display:grid;place-items:center;border:1.5px solid rgba(255,255,255,.25);
+  animation:pop .7s cubic-bezier(.2,1.3,.4,1) both;
+}
+@keyframes pop{0%{transform:scale(.5) rotate(-9deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.cel-in h1{font-size:33px;letter-spacing:-.032em;animation:rise .55s .18s cubic-bezier(.2,.9,.3,1) both}
+.cel-in .lede{color:rgba(255,255,255,.82);margin-top:12px;animation:rise .55s .3s cubic-bezier(.2,.9,.3,1) both}
+.cel-in .acts{margin-top:30px;animation:rise .55s .44s cubic-bezier(.2,.9,.3,1) both;display:flex;flex-direction:column;gap:10px}
+@keyframes rise{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+#celebrate .btn-2{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
+
+/* ---------- sheet ---------- */
+.sheet-bg{position:absolute;inset:0;z-index:70;background:rgba(12,32,27,.5);backdrop-filter:blur(2px);animation:fade .2s both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:71;background:var(--paper);
+  border-radius:26px 26px 0 0;box-shadow:var(--shadow-sheet);max-height:88%;overflow-y:auto;
+  padding:8px 18px calc(24px + env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,.9,.3,1) both;
+}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.grabber{width:38px;height:4px;border-radius:99px;background:var(--line);margin:6px auto 16px}
+
+/* ---------- toast ---------- */
+#toast{
+  position:absolute;left:50%;bottom:calc(var(--nav-h) + 16px);transform:translateX(-50%) translateY(14px);
+  z-index:90;background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;font-size:13.5px;
+  font-weight:600;opacity:0;pointer-events:none;transition:opacity .22s, transform .22s;
+  max-width:86%;text-align:center;box-shadow:0 12px 30px -10px rgba(0,0,0,.5);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ---------- misc ---------- */
+.empty{text-align:center;padding:44px 22px;color:var(--muted)}
+.empty svg{width:52px;height:52px;margin:0 auto 14px;color:#C3CFC5}
+.hidden{display:none !important}
+.art{display:flex;justify-content:center;padding:6px 0 2px}
+.art svg{max-width:78%}
+.zone .art{padding:2px 0 8px}
+.zone .art svg{max-width:150px}
+.doc-hero{background:linear-gradient(180deg,#FBFCFA,var(--card));border:1px solid var(--line-2);border-radius:var(--r-xl);padding:10px;margin:0 0 20px}
+.doc-hero .art svg{max-width:56%}
+.storecard{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);padding:14px}
+.storecard .lg{width:44px;height:44px;flex:none;border-radius:12px;display:grid;place-items:center;background:var(--marigold-2);color:#7A5210}
+.qr-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.qr-mini{background:#fff;border:1px solid var(--line);border-radius:var(--r-m);padding:10px;text-align:center}
+.qr-mini svg{width:100%;height:auto}
+.qr-mini b{display:block;font-size:12px;margin-top:7px;color:var(--ink-2)}
+.eco{background:linear-gradient(150deg,#E9F3E4,#F1F6EC);border:1px solid #D2E4CB;border-radius:var(--r-l);padding:16px}
+.eco .n{font-size:26px;font-weight:700;letter-spacing:-.03em;color:#2F6B23;line-height:1.05}
+.eco-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.chart{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
+.chart figure{margin:0;background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);padding:10px 8px 11px;text-align:center}
+.chart figure svg{height:72px;width:auto;margin:0 auto 7px}
+.chart figcaption{font-family:var(--ui);font-size:12px;font-weight:600;color:var(--ink-2);line-height:1.3}
+.chart figcaption em{display:block;font-style:normal;font-weight:400;font-size:11px;color:var(--muted);margin-top:2px}
+.pose{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);padding:13px;margin-bottom:10px;font-family:var(--ui)}
+.pose .top{display:flex;gap:12px;align-items:center;margin-bottom:9px}
+.pose .top svg{height:60px;width:auto;flex:none}
+.pose h5{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.012em}
+.pose .sig{background:transparent;border:0;padding:0;font-size:12.5px;color:var(--muted);margin-top:3px}
+.pose table{width:100%;border-collapse:collapse;font-size:12.5px}
+.pose td{padding:4px 0;vertical-align:top;line-height:1.4}
+.pose td:first-child{width:58px;font-weight:700;color:var(--ink-2)}
+.cert{border:2px solid var(--fir);border-radius:var(--r-m);padding:16px;background:#fff;font-family:var(--ui);position:relative}
+.cert::before{content:"";position:absolute;inset:5px;border:1px solid var(--line);border-radius:10px;pointer-events:none}
+.cert h4{font-size:17px;letter-spacing:-.02em;margin:0 0 2px}
+.cert .issuer{font-size:12px;color:var(--muted);margin-bottom:13px;line-height:1.4}
+.cert dl{margin:0;position:relative}
+.cert .cf{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dotted var(--line);font-size:13.5px}
+.cert .cf dt{color:var(--muted)}
+.cert .cf dd{margin:0;font-weight:600;text-align:right}
+.cert .cut{border-top:2px dashed var(--line);margin:14px -16px;padding-top:13px}
+.notice{border-radius:var(--r-m);padding:16px;font-family:var(--ui);border:1px solid var(--line)}
+.haswrap{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.hasbox{border:2px solid var(--line);border-radius:12px;padding:11px;text-align:center;background:#fff}
+.hasbox.on{border-color:var(--rust);background:var(--rust-2)}
+.hasbox.on.ok{border-color:var(--ok);background:#E9F4EC}
+.hasbox b{display:block;font-size:14px}
+.hasbox span{font-size:11.5px;color:var(--muted)}
+.profile{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-l);overflow:hidden}
+.profile .ph{background:var(--fir);color:#fff;padding:15px 16px;display:flex;gap:13px;align-items:center}
+.profile .ph h4{font-size:21px;margin:0;letter-spacing:-.024em}
+.profile .ph .small{color:rgba(255,255,255,.78)}
+.profile .pb{padding:14px 16px}
+.reviewbar{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);padding:13px 14px;margin-top:22px}
+.reviewbar.on{background:#EDF7EF;border-color:#BFDFC7}
+.photo-drop{
+  border:2px dashed var(--line);border-radius:var(--r-l);padding:26px 18px;text-align:center;
+  background:var(--card);cursor:pointer;
+}
+.photo-drop svg{width:34px;height:34px;color:var(--fir-3);margin:0 auto 10px}
+.photo-preview{border-radius:var(--r-l);width:100%;aspect-ratio:1;object-fit:cover;border:1px solid var(--line)}
+.sig{
+  background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-m);padding:15px;
+}
+.sig.signed{border-color:#BFD9C8;background:#F4FAF6}
+.link-list a{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--line-2);text-decoration:none;color:var(--ink);font-size:14.5px;font-weight:500;
+}
+.link-list a:last-child{border-bottom:0}
+.link-list svg{width:16px;height:16px;color:var(--muted);flex:none}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  .conf{display:none}
+}
+</style>
+</head>
+<body>
+<div id="desk"><div id="app">
+  <div id="root"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div></div>
+<script>
+/* QR Code generator — Kazuhiko Arase, MIT licensed (www.d-project.com).
+   Vendored inline so this file works with no network at all. */
+(function(){
+/* QRMode */
+var QRMode = {
+    MODE_NUMBER :       1 << 0,
+    MODE_ALPHA_NUM :    1 << 1,
+    MODE_8BIT_BYTE :    1 << 2,
+    MODE_KANJI :        1 << 3
+};
+
+/* QRErrorCorrectLevel */
+var QRErrorCorrectLevel = {
+	L : 1,
+	M : 0,
+	Q : 3,
+	H : 2
+};
+
+/* QRMaskPattern */
+var QRMaskPattern = {
+	PATTERN000 : 0,
+	PATTERN001 : 1,
+	PATTERN010 : 2,
+	PATTERN011 : 3,
+	PATTERN100 : 4,
+	PATTERN101 : 5,
+	PATTERN110 : 6,
+	PATTERN111 : 7
+};
+
+/* QRMath */
+var QRMath = {
+
+	glog : function(n) {
+	
+		if (n < 1) {
+			throw new Error("glog(" + n + ")");
+		}
+		
+		return QRMath.LOG_TABLE[n];
+	},
+	
+	gexp : function(n) {
+	
+		while (n < 0) {
+			n += 255;
+		}
+	
+		while (n >= 256) {
+			n -= 255;
+		}
+	
+		return QRMath.EXP_TABLE[n];
+	},
+	
+	EXP_TABLE : new Array(256),
+	
+	LOG_TABLE : new Array(256)
+
+};
+	
+for (var i = 0; i < 8; i++) {
+	QRMath.EXP_TABLE[i] = 1 << i;
+}
+for (var i = 8; i < 256; i++) {
+	QRMath.EXP_TABLE[i] = QRMath.EXP_TABLE[i - 4]
+		^ QRMath.EXP_TABLE[i - 5]
+		^ QRMath.EXP_TABLE[i - 6]
+		^ QRMath.EXP_TABLE[i - 8];
+}
+for (var i = 0; i < 255; i++) {
+	QRMath.LOG_TABLE[QRMath.EXP_TABLE[i] ] = i;
+}
+
+/* QRPolynomial */
+function QRPolynomial(num, shift) {
+	if (num.length === undefined) {
+		throw new Error(num.length + "/" + shift);
+	}
+
+	var offset = 0;
+
+	while (offset < num.length && num[offset] === 0) {
+		offset++;
+	}
+
+	this.num = new Array(num.length - offset + shift);
+	for (var i = 0; i < num.length - offset; i++) {
+		this.num[i] = num[i + offset];
+	}
+}
+
+QRPolynomial.prototype = {
+
+	get : function(index) {
+		return this.num[index];
+	},
+	
+	getLength : function() {
+		return this.num.length;
+	},
+	
+	multiply : function(e) {
+	
+		var num = new Array(this.getLength() + e.getLength() - 1);
+	
+		for (var i = 0; i < this.getLength(); i++) {
+			for (var j = 0; j < e.getLength(); j++) {
+				num[i + j] ^= QRMath.gexp(QRMath.glog(this.get(i) ) + QRMath.glog(e.get(j) ) );
+			}
+		}
+	
+		return new QRPolynomial(num, 0);
+	},
+	
+	mod : function(e) {
+	
+		if (this.getLength() - e.getLength() < 0) {
+			return this;
+		}
+	
+		var ratio = QRMath.glog(this.get(0) ) - QRMath.glog(e.get(0) );
+	
+		var num = new Array(this.getLength() );
+		
+		for (var i = 0; i < this.getLength(); i++) {
+			num[i] = this.get(i);
+		}
+		
+		for (var x = 0; x < e.getLength(); x++) {
+			num[x] ^= QRMath.gexp(QRMath.glog(e.get(x) ) + ratio);
+		}
+	
+		// recursive call
+		return new QRPolynomial(num, 0).mod(e);
+	}
+};
+
+/* QR8bitByte */
+function QR8bitByte(data) {
+	this.mode = QRMode.MODE_8BIT_BYTE;
+	this.data = data;
+}
+
+QR8bitByte.prototype = {
+
+	getLength : function() {
+		return this.data.length;
+	},
+	
+	write : function(buffer) {
+		for (var i = 0; i < this.data.length; i++) {
+			// not JIS ...
+			buffer.put(this.data.charCodeAt(i), 8);
+		}
+	}
+};
+
+/* QRBitBuffer */
+function QRBitBuffer() {
+	this.buffer = [];
+	this.length = 0;
+}
+
+QRBitBuffer.prototype = {
+
+	get : function(index) {
+		var bufIndex = Math.floor(index / 8);
+		return ( (this.buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+	},
+	
+	put : function(num, length) {
+		for (var i = 0; i < length; i++) {
+			this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+		}
+	},
+	
+	getLengthInBits : function() {
+		return this.length;
+	},
+	
+	putBit : function(bit) {
+	
+		var bufIndex = Math.floor(this.length / 8);
+		if (this.buffer.length <= bufIndex) {
+			this.buffer.push(0);
+		}
+	
+		if (bit) {
+			this.buffer[bufIndex] |= (0x80 >>> (this.length % 8) );
+		}
+	
+		this.length++;
+	}
+};
+
+/* QRRSBlock */
+function QRRSBlock(totalCount, dataCount) {
+	this.totalCount = totalCount;
+	this.dataCount  = dataCount;
+}
+
+QRRSBlock.RS_BLOCK_TABLE = [
+
+	// L
+	// M
+	// Q
+	// H
+
+	// 1
+	[1, 26, 19],
+	[1, 26, 16],
+	[1, 26, 13],
+	[1, 26, 9],
+	
+	// 2
+	[1, 44, 34],
+	[1, 44, 28],
+	[1, 44, 22],
+	[1, 44, 16],
+
+	// 3
+	[1, 70, 55],
+	[1, 70, 44],
+	[2, 35, 17],
+	[2, 35, 13],
+
+	// 4		
+	[1, 100, 80],
+	[2, 50, 32],
+	[2, 50, 24],
+	[4, 25, 9],
+	
+	// 5
+	[1, 134, 108],
+	[2, 67, 43],
+	[2, 33, 15, 2, 34, 16],
+	[2, 33, 11, 2, 34, 12],
+	
+	// 6
+	[2, 86, 68],
+	[4, 43, 27],
+	[4, 43, 19],
+	[4, 43, 15],
+	
+	// 7		
+	[2, 98, 78],
+	[4, 49, 31],
+	[2, 32, 14, 4, 33, 15],
+	[4, 39, 13, 1, 40, 14],
+	
+	// 8
+	[2, 121, 97],
+	[2, 60, 38, 2, 61, 39],
+	[4, 40, 18, 2, 41, 19],
+	[4, 40, 14, 2, 41, 15],
+	
+	// 9
+	[2, 146, 116],
+	[3, 58, 36, 2, 59, 37],
+	[4, 36, 16, 4, 37, 17],
+	[4, 36, 12, 4, 37, 13],
+	
+	// 10		
+	[2, 86, 68, 2, 87, 69],
+	[4, 69, 43, 1, 70, 44],
+	[6, 43, 19, 2, 44, 20],
+	[6, 43, 15, 2, 44, 16],
+
+	// 11
+	[4, 101, 81],
+	[1, 80, 50, 4, 81, 51],
+	[4, 50, 22, 4, 51, 23],
+	[3, 36, 12, 8, 37, 13],
+
+	// 12
+	[2, 116, 92, 2, 117, 93],
+	[6, 58, 36, 2, 59, 37],
+	[4, 46, 20, 6, 47, 21],
+	[7, 42, 14, 4, 43, 15],
+
+	// 13
+	[4, 133, 107],
+	[8, 59, 37, 1, 60, 38],
+	[8, 44, 20, 4, 45, 21],
+	[12, 33, 11, 4, 34, 12],
+
+	// 14
+	[3, 145, 115, 1, 146, 116],
+	[4, 64, 40, 5, 65, 41],
+	[11, 36, 16, 5, 37, 17],
+	[11, 36, 12, 5, 37, 13],
+
+	// 15
+	[5, 109, 87, 1, 110, 88],
+	[5, 65, 41, 5, 66, 42],
+	[5, 54, 24, 7, 55, 25],
+	[11, 36, 12],
+
+	// 16
+	[5, 122, 98, 1, 123, 99],
+	[7, 73, 45, 3, 74, 46],
+	[15, 43, 19, 2, 44, 20],
+	[3, 45, 15, 13, 46, 16],
+
+	// 17
+	[1, 135, 107, 5, 136, 108],
+	[10, 74, 46, 1, 75, 47],
+	[1, 50, 22, 15, 51, 23],
+	[2, 42, 14, 17, 43, 15],
+
+	// 18
+	[5, 150, 120, 1, 151, 121],
+	[9, 69, 43, 4, 70, 44],
+	[17, 50, 22, 1, 51, 23],
+	[2, 42, 14, 19, 43, 15],
+
+	// 19
+	[3, 141, 113, 4, 142, 114],
+	[3, 70, 44, 11, 71, 45],
+	[17, 47, 21, 4, 48, 22],
+	[9, 39, 13, 16, 40, 14],
+
+	// 20
+	[3, 135, 107, 5, 136, 108],
+	[3, 67, 41, 13, 68, 42],
+	[15, 54, 24, 5, 55, 25],
+	[15, 43, 15, 10, 44, 16],
+
+	// 21
+	[4, 144, 116, 4, 145, 117],
+	[17, 68, 42],
+	[17, 50, 22, 6, 51, 23],
+	[19, 46, 16, 6, 47, 17],
+
+	// 22
+	[2, 139, 111, 7, 140, 112],
+	[17, 74, 46],
+	[7, 54, 24, 16, 55, 25],
+	[34, 37, 13],
+
+	// 23
+	[4, 151, 121, 5, 152, 122],
+	[4, 75, 47, 14, 76, 48],
+	[11, 54, 24, 14, 55, 25],
+	[16, 45, 15, 14, 46, 16],
+
+	// 24
+	[6, 147, 117, 4, 148, 118],
+	[6, 73, 45, 14, 74, 46],
+	[11, 54, 24, 16, 55, 25],
+	[30, 46, 16, 2, 47, 17],
+
+	// 25
+	[8, 132, 106, 4, 133, 107],
+	[8, 75, 47, 13, 76, 48],
+	[7, 54, 24, 22, 55, 25],
+	[22, 45, 15, 13, 46, 16],
+
+	// 26
+	[10, 142, 114, 2, 143, 115],
+	[19, 74, 46, 4, 75, 47],
+	[28, 50, 22, 6, 51, 23],
+	[33, 46, 16, 4, 47, 17],
+
+	// 27
+	[8, 152, 122, 4, 153, 123],
+	[22, 73, 45, 3, 74, 46],
+	[8, 53, 23, 26, 54, 24],
+	[12, 45, 15, 28, 46, 16],
+
+	// 28
+	[3, 147, 117, 10, 148, 118],
+	[3, 73, 45, 23, 74, 46],
+	[4, 54, 24, 31, 55, 25],
+	[11, 45, 15, 31, 46, 16],
+
+	// 29
+	[7, 146, 116, 7, 147, 117],
+	[21, 73, 45, 7, 74, 46],
+	[1, 53, 23, 37, 54, 24],
+	[19, 45, 15, 26, 46, 16],
+
+	// 30
+	[5, 145, 115, 10, 146, 116],
+	[19, 75, 47, 10, 76, 48],
+	[15, 54, 24, 25, 55, 25],
+	[23, 45, 15, 25, 46, 16],
+
+	// 31
+	[13, 145, 115, 3, 146, 116],
+	[2, 74, 46, 29, 75, 47],
+	[42, 54, 24, 1, 55, 25],
+	[23, 45, 15, 28, 46, 16],
+
+	// 32
+	[17, 145, 115],
+	[10, 74, 46, 23, 75, 47],
+	[10, 54, 24, 35, 55, 25],
+	[19, 45, 15, 35, 46, 16],
+
+	// 33
+	[17, 145, 115, 1, 146, 116],
+	[14, 74, 46, 21, 75, 47],
+	[29, 54, 24, 19, 55, 25],
+	[11, 45, 15, 46, 46, 16],
+
+	// 34
+	[13, 145, 115, 6, 146, 116],
+	[14, 74, 46, 23, 75, 47],
+	[44, 54, 24, 7, 55, 25],
+	[59, 46, 16, 1, 47, 17],
+
+	// 35
+	[12, 151, 121, 7, 152, 122],
+	[12, 75, 47, 26, 76, 48],
+	[39, 54, 24, 14, 55, 25],
+	[22, 45, 15, 41, 46, 16],
+
+	// 36
+	[6, 151, 121, 14, 152, 122],
+	[6, 75, 47, 34, 76, 48],
+	[46, 54, 24, 10, 55, 25],
+	[2, 45, 15, 64, 46, 16],
+
+	// 37
+	[17, 152, 122, 4, 153, 123],
+	[29, 74, 46, 14, 75, 47],
+	[49, 54, 24, 10, 55, 25],
+	[24, 45, 15, 46, 46, 16],
+
+	// 38
+	[4, 152, 122, 18, 153, 123],
+	[13, 74, 46, 32, 75, 47],
+	[48, 54, 24, 14, 55, 25],
+	[42, 45, 15, 32, 46, 16],
+
+	// 39
+	[20, 147, 117, 4, 148, 118],
+	[40, 75, 47, 7, 76, 48],
+	[43, 54, 24, 22, 55, 25],
+	[10, 45, 15, 67, 46, 16],
+
+	// 40
+	[19, 148, 118, 6, 149, 119],
+	[18, 75, 47, 31, 76, 48],
+	[34, 54, 24, 34, 55, 25],
+	[20, 45, 15, 61, 46, 16]
+];
+
+QRRSBlock.getRSBlocks = function(typeNumber, errorCorrectLevel) {
+	
+	var rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
+	
+	if (rsBlock === undefined) {
+		throw new Error("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel);
+	}
+
+	var length = rsBlock.length / 3;
+	
+	var list = [];
+	
+	for (var i = 0; i < length; i++) {
+
+		var count = rsBlock[i * 3 + 0];
+		var totalCount = rsBlock[i * 3 + 1];
+		var dataCount  = rsBlock[i * 3 + 2];
+
+		for (var j = 0; j < count; j++) {
+			list.push(new QRRSBlock(totalCount, dataCount) );	
+		}
+	}
+	
+	return list;
+};
+
+QRRSBlock.getRsBlockTable = function(typeNumber, errorCorrectLevel) {
+
+	switch(errorCorrectLevel) {
+	case QRErrorCorrectLevel.L :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+	case QRErrorCorrectLevel.M :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+	case QRErrorCorrectLevel.Q :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+	case QRErrorCorrectLevel.H :
+		return QRRSBlock.RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+	default :
+		return undefined;
+	}
+};
+
+/* QRUtil */
+var QRUtil = {
+
+    PATTERN_POSITION_TABLE : [
+        [],
+        [6, 18],
+        [6, 22],
+        [6, 26],
+        [6, 30],
+        [6, 34],
+        [6, 22, 38],
+        [6, 24, 42],
+        [6, 26, 46],
+        [6, 28, 50],
+        [6, 30, 54],        
+        [6, 32, 58],
+        [6, 34, 62],
+        [6, 26, 46, 66],
+        [6, 26, 48, 70],
+        [6, 26, 50, 74],
+        [6, 30, 54, 78],
+        [6, 30, 56, 82],
+        [6, 30, 58, 86],
+        [6, 34, 62, 90],
+        [6, 28, 50, 72, 94],
+        [6, 26, 50, 74, 98],
+        [6, 30, 54, 78, 102],
+        [6, 28, 54, 80, 106],
+        [6, 32, 58, 84, 110],
+        [6, 30, 58, 86, 114],
+        [6, 34, 62, 90, 118],
+        [6, 26, 50, 74, 98, 122],
+        [6, 30, 54, 78, 102, 126],
+        [6, 26, 52, 78, 104, 130],
+        [6, 30, 56, 82, 108, 134],
+        [6, 34, 60, 86, 112, 138],
+        [6, 30, 58, 86, 114, 142],
+        [6, 34, 62, 90, 118, 146],
+        [6, 30, 54, 78, 102, 126, 150],
+        [6, 24, 50, 76, 102, 128, 154],
+        [6, 28, 54, 80, 106, 132, 158],
+        [6, 32, 58, 84, 110, 136, 162],
+        [6, 26, 54, 82, 110, 138, 166],
+        [6, 30, 58, 86, 114, 142, 170]
+    ],
+
+    G15 : (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0),
+    G18 : (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0),
+    G15_MASK : (1 << 14) | (1 << 12) | (1 << 10)    | (1 << 4) | (1 << 1),
+
+    getBCHTypeInfo : function(data) {
+        var d = data << 10;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) >= 0) {
+            d ^= (QRUtil.G15 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G15) ) );    
+        }
+        return ( (data << 10) | d) ^ QRUtil.G15_MASK;
+    },
+
+    getBCHTypeNumber : function(data) {
+        var d = data << 12;
+        while (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) >= 0) {
+            d ^= (QRUtil.G18 << (QRUtil.getBCHDigit(d) - QRUtil.getBCHDigit(QRUtil.G18) ) );    
+        }
+        return (data << 12) | d;
+    },
+
+    getBCHDigit : function(data) {
+
+        var digit = 0;
+
+        while (data !== 0) {
+            digit++;
+            data >>>= 1;
+        }
+
+        return digit;
+    },
+
+    getPatternPosition : function(typeNumber) {
+        return QRUtil.PATTERN_POSITION_TABLE[typeNumber - 1];
+    },
+
+    getMask : function(maskPattern, i, j) {
+        
+        switch (maskPattern) {
+            
+        case QRMaskPattern.PATTERN000 : return (i + j) % 2 === 0;
+        case QRMaskPattern.PATTERN001 : return i % 2 === 0;
+        case QRMaskPattern.PATTERN010 : return j % 3 === 0;
+        case QRMaskPattern.PATTERN011 : return (i + j) % 3 === 0;
+        case QRMaskPattern.PATTERN100 : return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 === 0;
+        case QRMaskPattern.PATTERN101 : return (i * j) % 2 + (i * j) % 3 === 0;
+        case QRMaskPattern.PATTERN110 : return ( (i * j) % 2 + (i * j) % 3) % 2 === 0;
+        case QRMaskPattern.PATTERN111 : return ( (i * j) % 3 + (i + j) % 2) % 2 === 0;
+
+        default :
+            throw new Error("bad maskPattern:" + maskPattern);
+        }
+    },
+
+    getErrorCorrectPolynomial : function(errorCorrectLength) {
+
+        var a = new QRPolynomial([1], 0);
+
+        for (var i = 0; i < errorCorrectLength; i++) {
+            a = a.multiply(new QRPolynomial([1, QRMath.gexp(i)], 0) );
+        }
+
+        return a;
+    },
+
+    getLengthInBits : function(mode, type) {
+
+        if (1 <= type && type < 10) {
+
+            // 1 - 9
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 10;
+            case QRMode.MODE_ALPHA_NUM  : return 9;
+            case QRMode.MODE_8BIT_BYTE  : return 8;
+            case QRMode.MODE_KANJI      : return 8;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 27) {
+
+            // 10 - 26
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 12;
+            case QRMode.MODE_ALPHA_NUM  : return 11;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 10;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else if (type < 41) {
+
+            // 27 - 40
+
+            switch(mode) {
+            case QRMode.MODE_NUMBER     : return 14;
+            case QRMode.MODE_ALPHA_NUM  : return 13;
+            case QRMode.MODE_8BIT_BYTE  : return 16;
+            case QRMode.MODE_KANJI      : return 12;
+            default :
+                throw new Error("mode:" + mode);
+            }
+
+        } else {
+            throw new Error("type:" + type);
+        }
+    },
+
+    getLostPoint : function(qrCode) {
+        
+        var moduleCount = qrCode.getModuleCount();
+        var lostPoint = 0;
+        var row = 0; 
+        var col = 0;
+
+        
+        // LEVEL1
+        
+        for (row = 0; row < moduleCount; row++) {
+
+            for (col = 0; col < moduleCount; col++) {
+
+                var sameCount = 0;
+                var dark = qrCode.isDark(row, col);
+
+                for (var r = -1; r <= 1; r++) {
+
+                    if (row + r < 0 || moduleCount <= row + r) {
+                        continue;
+                    }
+
+                    for (var c = -1; c <= 1; c++) {
+
+                        if (col + c < 0 || moduleCount <= col + c) {
+                            continue;
+                        }
+
+                        if (r === 0 && c === 0) {
+                            continue;
+                        }
+
+                        if (dark === qrCode.isDark(row + r, col + c) ) {
+                            sameCount++;
+                        }
+                    }
+                }
+
+                if (sameCount > 5) {
+                    lostPoint += (3 + sameCount - 5);
+                }
+            }
+        }
+
+        // LEVEL2
+
+        for (row = 0; row < moduleCount - 1; row++) {
+            for (col = 0; col < moduleCount - 1; col++) {
+                var count = 0;
+                if (qrCode.isDark(row,     col    ) ) count++;
+                if (qrCode.isDark(row + 1, col    ) ) count++;
+                if (qrCode.isDark(row,     col + 1) ) count++;
+                if (qrCode.isDark(row + 1, col + 1) ) count++;
+                if (count === 0 || count === 4) {
+                    lostPoint += 3;
+                }
+            }
+        }
+
+        // LEVEL3
+
+        for (row = 0; row < moduleCount; row++) {
+            for (col = 0; col < moduleCount - 6; col++) {
+                if (qrCode.isDark(row, col) && 
+                        !qrCode.isDark(row, col + 1) && 
+                         qrCode.isDark(row, col + 2) && 
+                         qrCode.isDark(row, col + 3) && 
+                         qrCode.isDark(row, col + 4) && 
+                        !qrCode.isDark(row, col + 5) && 
+                         qrCode.isDark(row, col + 6) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount - 6; row++) {
+                if (qrCode.isDark(row, col) &&
+                        !qrCode.isDark(row + 1, col) &&
+                         qrCode.isDark(row + 2, col) &&
+                         qrCode.isDark(row + 3, col) &&
+                         qrCode.isDark(row + 4, col) &&
+                        !qrCode.isDark(row + 5, col) &&
+                         qrCode.isDark(row + 6, col) ) {
+                    lostPoint += 40;
+                }
+            }
+        }
+
+        // LEVEL4
+        
+        var darkCount = 0;
+
+        for (col = 0; col < moduleCount; col++) {
+            for (row = 0; row < moduleCount; row++) {
+                if (qrCode.isDark(row, col) ) {
+                    darkCount++;
+                }
+            }
+        }
+        
+        var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+        lostPoint += ratio * 10;
+
+        return lostPoint;       
+    }
+
+};
+
+/* index */
+//---------------------------------------------------------------------
+// QRCode for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//   http://www.opensource.org/licenses/mit-license.php
+//
+// The word "QR Code" is registered trademark of 
+// DENSO WAVE INCORPORATED
+//   http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+// Modified to work in node for this project (and some refactoring)
+//---------------------------------------------------------------------
+
+
+
+
+
+
+function QRCode(typeNumber, errorCorrectLevel) {
+	this.typeNumber = typeNumber;
+	this.errorCorrectLevel = errorCorrectLevel;
+	this.modules = null;
+	this.moduleCount = 0;
+	this.dataCache = null;
+	this.dataList = [];
+}
+
+QRCode.prototype = {
+	
+	addData : function(data) {
+		var newData = new QR8bitByte(data);
+		this.dataList.push(newData);
+		this.dataCache = null;
+	},
+	
+	isDark : function(row, col) {
+		if (row < 0 || this.moduleCount <= row || col < 0 || this.moduleCount <= col) {
+			throw new Error(row + "," + col);
+		}
+		return this.modules[row][col];
+	},
+
+	getModuleCount : function() {
+		return this.moduleCount;
+	},
+	
+	make : function() {
+		// Calculate automatically typeNumber if provided is < 1
+		if (this.typeNumber < 1 ){
+			var typeNumber = 1;
+			for (typeNumber = 1; typeNumber < 40; typeNumber++) {
+				var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, this.errorCorrectLevel);
+
+				var buffer = new QRBitBuffer();
+				var totalDataCount = 0;
+				for (var i = 0; i < rsBlocks.length; i++) {
+					totalDataCount += rsBlocks[i].dataCount;
+				}
+
+				for (var x = 0; x < this.dataList.length; x++) {
+					var data = this.dataList[x];
+					buffer.put(data.mode, 4);
+					buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+					data.write(buffer);
+				}
+				if (buffer.getLengthInBits() <= totalDataCount * 8)
+					break;
+			}
+			this.typeNumber = typeNumber;
+		}
+		this.makeImpl(false, this.getBestMaskPattern() );
+	},
+	
+	makeImpl : function(test, maskPattern) {
+		
+		this.moduleCount = this.typeNumber * 4 + 17;
+		this.modules = new Array(this.moduleCount);
+		
+		for (var row = 0; row < this.moduleCount; row++) {
+			
+			this.modules[row] = new Array(this.moduleCount);
+			
+			for (var col = 0; col < this.moduleCount; col++) {
+				this.modules[row][col] = null;//(col + row) % 3;
+			}
+		}
+	
+		this.setupPositionProbePattern(0, 0);
+		this.setupPositionProbePattern(this.moduleCount - 7, 0);
+		this.setupPositionProbePattern(0, this.moduleCount - 7);
+		this.setupPositionAdjustPattern();
+		this.setupTimingPattern();
+		this.setupTypeInfo(test, maskPattern);
+		
+		if (this.typeNumber >= 7) {
+			this.setupTypeNumber(test);
+		}
+	
+		if (this.dataCache === null) {
+			this.dataCache = QRCode.createData(this.typeNumber, this.errorCorrectLevel, this.dataList);
+		}
+	
+		this.mapData(this.dataCache, maskPattern);
+	},
+
+	setupPositionProbePattern : function(row, col)  {
+		
+		for (var r = -1; r <= 7; r++) {
+			
+			if (row + r <= -1 || this.moduleCount <= row + r) continue;
+			
+			for (var c = -1; c <= 7; c++) {
+				
+				if (col + c <= -1 || this.moduleCount <= col + c) continue;
+				
+				if ( (0 <= r && r <= 6 && (c === 0 || c === 6) ) || 
+                     (0 <= c && c <= 6 && (r === 0 || r === 6) ) || 
+                     (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+					this.modules[row + r][col + c] = true;
+				} else {
+					this.modules[row + r][col + c] = false;
+				}
+			}		
+		}		
+	},
+	
+	getBestMaskPattern : function() {
+	
+		var minLostPoint = 0;
+		var pattern = 0;
+	
+		for (var i = 0; i < 8; i++) {
+			
+			this.makeImpl(true, i);
+	
+			var lostPoint = QRUtil.getLostPoint(this);
+	
+			if (i === 0 || minLostPoint >  lostPoint) {
+				minLostPoint = lostPoint;
+				pattern = i;
+			}
+		}
+	
+		return pattern;
+	},
+	
+	createMovieClip : function(target_mc, instance_name, depth) {
+	
+		var qr_mc = target_mc.createEmptyMovieClip(instance_name, depth);
+		var cs = 1;
+	
+		this.make();
+
+		for (var row = 0; row < this.modules.length; row++) {
+			
+			var y = row * cs;
+			
+			for (var col = 0; col < this.modules[row].length; col++) {
+	
+				var x = col * cs;
+				var dark = this.modules[row][col];
+			
+				if (dark) {
+					qr_mc.beginFill(0, 100);
+					qr_mc.moveTo(x, y);
+					qr_mc.lineTo(x + cs, y);
+					qr_mc.lineTo(x + cs, y + cs);
+					qr_mc.lineTo(x, y + cs);
+					qr_mc.endFill();
+				}
+			}
+		}
+		
+		return qr_mc;
+	},
+
+	setupTimingPattern : function() {
+		
+		for (var r = 8; r < this.moduleCount - 8; r++) {
+			if (this.modules[r][6] !== null) {
+				continue;
+			}
+			this.modules[r][6] = (r % 2 === 0);
+		}
+	
+		for (var c = 8; c < this.moduleCount - 8; c++) {
+			if (this.modules[6][c] !== null) {
+				continue;
+			}
+			this.modules[6][c] = (c % 2 === 0);
+		}
+	},
+	
+	setupPositionAdjustPattern : function() {
+	
+		var pos = QRUtil.getPatternPosition(this.typeNumber);
+		
+		for (var i = 0; i < pos.length; i++) {
+		
+			for (var j = 0; j < pos.length; j++) {
+			
+				var row = pos[i];
+				var col = pos[j];
+				
+				if (this.modules[row][col] !== null) {
+					continue;
+				}
+				
+				for (var r = -2; r <= 2; r++) {
+				
+					for (var c = -2; c <= 2; c++) {
+					
+						if (Math.abs(r) === 2 || 
+                            Math.abs(c) === 2 ||
+                            (r === 0 && c === 0) ) {
+							this.modules[row + r][col + c] = true;
+						} else {
+							this.modules[row + r][col + c] = false;
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	setupTypeNumber : function(test) {
+	
+		var bits = QRUtil.getBCHTypeNumber(this.typeNumber);
+        var mod;
+	
+		for (var i = 0; i < 18; i++) {
+			mod = (!test && ( (bits >> i) & 1) === 1);
+			this.modules[Math.floor(i / 3)][i % 3 + this.moduleCount - 8 - 3] = mod;
+		}
+	
+		for (var x = 0; x < 18; x++) {
+			mod = (!test && ( (bits >> x) & 1) === 1);
+			this.modules[x % 3 + this.moduleCount - 8 - 3][Math.floor(x / 3)] = mod;
+		}
+	},
+	
+	setupTypeInfo : function(test, maskPattern) {
+	
+		var data = (this.errorCorrectLevel << 3) | maskPattern;
+		var bits = QRUtil.getBCHTypeInfo(data);
+        var mod;
+	
+		// vertical		
+		for (var v = 0; v < 15; v++) {
+	
+			mod = (!test && ( (bits >> v) & 1) === 1);
+	
+			if (v < 6) {
+				this.modules[v][8] = mod;
+			} else if (v < 8) {
+				this.modules[v + 1][8] = mod;
+			} else {
+				this.modules[this.moduleCount - 15 + v][8] = mod;
+			}
+		}
+	
+		// horizontal
+		for (var h = 0; h < 15; h++) {
+	
+			mod = (!test && ( (bits >> h) & 1) === 1);
+			
+			if (h < 8) {
+				this.modules[8][this.moduleCount - h - 1] = mod;
+			} else if (h < 9) {
+				this.modules[8][15 - h - 1 + 1] = mod;
+			} else {
+				this.modules[8][15 - h - 1] = mod;
+			}
+		}
+	
+		// fixed module
+		this.modules[this.moduleCount - 8][8] = (!test);
+	
+	},
+	
+	mapData : function(data, maskPattern) {
+		
+		var inc = -1;
+		var row = this.moduleCount - 1;
+		var bitIndex = 7;
+		var byteIndex = 0;
+		
+		for (var col = this.moduleCount - 1; col > 0; col -= 2) {
+	
+			if (col === 6) col--;
+	
+			while (true) {
+	
+				for (var c = 0; c < 2; c++) {
+					
+					if (this.modules[row][col - c] === null) {
+						
+						var dark = false;
+	
+						if (byteIndex < data.length) {
+							dark = ( ( (data[byteIndex] >>> bitIndex) & 1) === 1);
+						}
+	
+						var mask = QRUtil.getMask(maskPattern, row, col - c);
+	
+						if (mask) {
+							dark = !dark;
+						}
+						
+						this.modules[row][col - c] = dark;
+						bitIndex--;
+	
+						if (bitIndex === -1) {
+							byteIndex++;
+							bitIndex = 7;
+						}
+					}
+				}
+								
+				row += inc;
+	
+				if (row < 0 || this.moduleCount <= row) {
+					row -= inc;
+					inc = -inc;
+					break;
+				}
+			}
+		}
+		
+	}
+
+};
+
+QRCode.PAD0 = 0xEC;
+QRCode.PAD1 = 0x11;
+
+QRCode.createData = function(typeNumber, errorCorrectLevel, dataList) {
+	
+	var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectLevel);
+	
+	var buffer = new QRBitBuffer();
+	
+	for (var i = 0; i < dataList.length; i++) {
+		var data = dataList[i];
+		buffer.put(data.mode, 4);
+		buffer.put(data.getLength(), QRUtil.getLengthInBits(data.mode, typeNumber) );
+		data.write(buffer);
+	}
+
+	// calc num max data.
+	var totalDataCount = 0;
+	for (var x = 0; x < rsBlocks.length; x++) {
+		totalDataCount += rsBlocks[x].dataCount;
+	}
+
+	if (buffer.getLengthInBits() > totalDataCount * 8) {
+		throw new Error("code length overflow. (" + 
+            buffer.getLengthInBits() + 
+            ">" +  
+            totalDataCount * 8 + 
+            ")");
+	}
+
+	// end code
+	if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+		buffer.put(0, 4);
+	}
+
+	// padding
+	while (buffer.getLengthInBits() % 8 !== 0) {
+		buffer.putBit(false);
+	}
+
+	// padding
+	while (true) {
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD0, 8);
+		
+		if (buffer.getLengthInBits() >= totalDataCount * 8) {
+			break;
+		}
+		buffer.put(QRCode.PAD1, 8);
+	}
+
+	return QRCode.createBytes(buffer, rsBlocks);
+};
+
+QRCode.createBytes = function(buffer, rsBlocks) {
+
+	var offset = 0;
+	
+	var maxDcCount = 0;
+	var maxEcCount = 0;
+	
+	var dcdata = new Array(rsBlocks.length);
+	var ecdata = new Array(rsBlocks.length);
+	
+	for (var r = 0; r < rsBlocks.length; r++) {
+
+		var dcCount = rsBlocks[r].dataCount;
+		var ecCount = rsBlocks[r].totalCount - dcCount;
+
+		maxDcCount = Math.max(maxDcCount, dcCount);
+		maxEcCount = Math.max(maxEcCount, ecCount);
+		
+		dcdata[r] = new Array(dcCount);
+		
+		for (var i = 0; i < dcdata[r].length; i++) {
+			dcdata[r][i] = 0xff & buffer.buffer[i + offset];
+		}
+		offset += dcCount;
+		
+		var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+		var rawPoly = new QRPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+		var modPoly = rawPoly.mod(rsPoly);
+		ecdata[r] = new Array(rsPoly.getLength() - 1);
+		for (var x = 0; x < ecdata[r].length; x++) {
+            var modIndex = x + modPoly.getLength() - ecdata[r].length;
+			ecdata[r][x] = (modIndex >= 0)? modPoly.get(modIndex) : 0;
+		}
+
+	}
+	
+	var totalCodeCount = 0;
+	for (var y = 0; y < rsBlocks.length; y++) {
+		totalCodeCount += rsBlocks[y].totalCount;
+	}
+
+	var data = new Array(totalCodeCount);
+	var index = 0;
+
+	for (var z = 0; z < maxDcCount; z++) {
+		for (var s = 0; s < rsBlocks.length; s++) {
+			if (z < dcdata[s].length) {
+				data[index++] = dcdata[s][z];
+			}
+		}
+	}
+
+	for (var xx = 0; xx < maxEcCount; xx++) {
+		for (var t = 0; t < rsBlocks.length; t++) {
+			if (xx < ecdata[t].length) {
+				data[index++] = ecdata[t][xx];
+			}
+		}
+	}
+
+	return data;
+
+};
+
+window.qrcode = function(type, ecl){
+  return new QRCode(type|0, QRErrorCorrectLevel[ecl] !== undefined ? QRErrorCorrectLevel[ecl] : QRErrorCorrectLevel.H);
+};
+})();
+</script>
+<script>
+/* =============================================================
+   ICONS — single-path line icons, 24x24, currentColor
+   ============================================================= */
+const I = (d, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}${extra}</svg>`;
+const ICON = {
+  home:      I('<path d="M3 10.2 12 3l9 7.2V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>'),
+  book:      I('<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19v3H5.5A1.5 1.5 0 0 1 4 19.5z"/>'),
+  check:     I('<path d="M20 6 9 17l-5-5"/>'),
+  checkbox:  I('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8.5 12.2l2.4 2.4 4.8-4.8"/>'),
+  pin:       I('<path d="M20 10c0 5.2-8 12-8 12s-8-6.8-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="2.8"/>'),
+  file:      I('<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>'),
+  phone:     I('<path d="M15.5 21A13.5 13.5 0 0 1 3 8.5 3 3 0 0 1 6 5.5h1.6a1 1 0 0 1 1 .84l.6 3a1 1 0 0 1-.5 1L7.5 11.4a11 11 0 0 0 5.1 5.1l1.06-1.2a1 1 0 0 1 1-.5l3 .6a1 1 0 0 1 .84 1V18a3 3 0 0 1-3 3Z"/>'),
+  ext:       I('<path d="M14 4h6v6"/><path d="M20 4 11 13"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+  cal:       I('<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
+  cam:       I('<path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2.2l1.2-2h8.2l1.2 2h2.2A1.5 1.5 0 0 1 21 8.5v10A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5z"/><circle cx="12" cy="13" r="3.6"/>'),
+  heart:     I('<path d="M12 20s-7.5-4.6-7.5-9.6A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20Z"/>'),
+  alert:     I('<path d="M12 3.5 22 20H2Z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".6" fill="currentColor"/>'),
+  chev:      I('<path d="m9 5 7 7-7 7"/>'),
+  chevL:     I('<path d="m15 5-7 7 7 7"/>'),
+  shield:    I('<path d="M12 3 5 6v6c0 4.4 3 8 7 9 4-1 7-4.6 7-9V6z"/><path d="m9 12 2 2 4-4"/>'),
+  syringe:   I('<path d="m14 5 5 5"/><path d="m17 2 5 5"/><path d="m11.5 7.5 5 5L8 21H3v-5z"/><path d="m10 11 3 3"/>'),
+  tag:       I('<path d="M3 11V5a2 2 0 0 1 2-2h6l9.5 9.5a2 2 0 0 1 0 2.8l-5.2 5.2a2 2 0 0 1-2.8 0Z"/><circle cx="7.8" cy="7.8" r="1.4"/>'),
+  chip:      I('<rect x="6.5" y="6.5" width="11" height="11" rx="2.5"/><path d="M10 3v3.5M14 3v3.5M10 17.5V21M14 17.5V21M3 10h3.5M3 14h3.5M17.5 10H21M17.5 14H21"/>'),
+  paw:       I('<ellipse cx="6.4" cy="9.6" rx="2.1" ry="2.7"/><ellipse cx="10.6" cy="6.6" rx="2.1" ry="2.8"/><ellipse cx="15.4" cy="6.6" rx="2.1" ry="2.8"/><ellipse cx="19" cy="10.4" rx="2" ry="2.5"/><path d="M12.6 12.6c3 0 5.4 2 5.4 4.4 0 1.9-1.6 3-3.6 3-1.2 0-1.7-.5-3-.5s-1.8.5-3 .5c-2 0-3.6-1.1-3.6-3 0-2.4 2.6-4.4 5.4-4.4Z"/>'),
+  play:      I('<circle cx="12" cy="12" r="9"/><path d="m10 8.5 6 3.5-6 3.5z"/>'),
+  gift:      I('<rect x="3" y="9" width="18" height="12" rx="2"/><path d="M3 13h18M12 9v12"/><path d="M12 9S9.5 3.5 7 5s1 4 5 4c4 0 7-1 5-4s-5 4-5 4Z"/>'),
+  search:    I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/>'),
+  share:     I('<path d="M12 15V3"/><path d="m8 7 4-4 4 4"/><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/>'),
+  qr:        I('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v3M14 20h3M20 20h1"/>'),
+  clock:     I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5.2l3.2 2"/>'),
+  bowl:      I('<path d="M3 11h18a9 9 0 0 1-9 9 9 9 0 0 1-9-9Z"/><path d="M8 8c0-2 1.5-2 1.5-3.5M12 8c0-2 1.5-2 1.5-3.5M16 8c0-2 1.5-2 1.5-3.5"/>'),
+  pencil:    I('<path d="M4 20h4L20 8a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m14.5 5.5 4 4"/>'),
+  plus:      I('<path d="M12 5v14M5 12h14"/>'),
+  x:         I('<path d="m6 6 12 12M18 6 6 18"/>'),
+  leaf:      I('<path d="M20 4C9 4 4 9 4 15c0 2.5 1 4 1 4s7 .5 11-3.5C19 12.5 20 8 20 4Z"/><path d="M5 19 14 10"/>'),
+  users:     I('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16.5 5.2a3.2 3.2 0 0 1 0 5.6M18 14.8c2 .8 3 2.7 3 5.2"/>'),
+  sparkle:   I('<path d="M12 3.5 13.9 9l5.6 1.9-5.6 1.9L12 18.5 10.1 12.8 4.5 10.9 10.1 9z"/><path d="M18.5 3v3M20 4.5h-3"/>'),
+};
+
+/* Original cat illustrations, drawn for this app. */
+const ART = {"loaf":{"vb":"0 0 120 104","d":"<path d=\"M22,90 C12,90 8,80 14,68 C24,48 48,40 70,45 C86,49 94,62 94,74 C94,84 89,90 80,90 Z\" fill=\"#E49B41\"/> <path d=\"M72,50 L74,28 L90,42 Z\" fill=\"#E49B41\"/><path d=\"M75.15,48.6 L76.38,34.12 L86.85,43.4 Z\" fill=\"#EFA69C\"/> <path d=\"M96,42 L110,30 L108,52 Z\" fill=\"#E49B41\"/><path d=\"M98.1,43.75 L107.28,35.78 L105.9,50.25 Z\" fill=\"#EFA69C\"/> <path d=\"M90,44 C104,48 112,60 112,72 C112,84 105,90 94,90 C82,90 76,82 76,71 C76,57 82,47 90,44 Z\" fill=\"#E49B41\"/> <path d=\"M84,76 C84,86 89,90 95,90 C90,90 84,86 84,76 Z\" fill=\"#FFF1DE\"/> <ellipse cx=\"94\" cy=\"80\" rx=\"12\" ry=\"8\" fill=\"#FFF1DE\"/> <path d=\"M85,68 q4,4.5 8,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M98,68 q4,4.5 8,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M93.5,74 l3.4,0 l-1.7,2.6 Z\" fill=\"#EFA69C\"/> <path d=\"M24,88 C10,86 2,76 6,66\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/> <path d=\"M34,58 l10,-4 M46,50 l11,-3 M60,46 l11,-1\" stroke=\"#C87E2B\" stroke-width=\"3.2\" stroke-linecap=\"round\" fill=\"none\"/>"},"sit":{"vb":"0 0 124 118","d":"<path d=\"M22,104 C10,104 6,92 12,78 C22,54 38,40 56,36 C74,32 88,42 90,60 C92,78 86,92 78,104 Z\" fill=\"#E49B41\"/> <path d=\"M62,30 C84,30 98,44 98,62 C98,80 84,92 62,92 C48,92 38,84 34,72 C30,56 42,30 62,30 Z\" fill=\"#E49B41\"/> <path d=\"M38,44 L34,14 L62,28 Z\" fill=\"#E49B41\"/><path d=\"M42.2,41.2 L39.44,21.48 L57.8,30.8 Z\" fill=\"#EFA69C\"/> <path d=\"M76,28 L100,16 L100,44 Z\" fill=\"#E49B41\"/><path d=\"M80.2,30.8 L95.92,22.8 L95.8,41.2 Z\" fill=\"#EFA69C\"/> <path d=\"M60,74 C72,80 78,92 78,104 L46,104 C46,90 50,78 60,74 Z\" fill=\"#FFF1DE\"/> <ellipse cx=\"58.575\" cy=\"60\" rx=\"3.132\" ry=\"3.915\" fill=\"#3B2B1A\"/><ellipse cx=\"76.125\" cy=\"60\" rx=\"3.132\" ry=\"3.915\" fill=\"#3B2B1A\"/><path d=\"M65.325,68.1 l4.59,0 l-2.295,3.5100000000000002 Z\" fill=\"#EFA69C\"/> <path d=\"M56,100 l0,8 M74,100 l0,8\" stroke=\"#E49B41\" stroke-width=\"13\" stroke-linecap=\"round\" fill=\"none\"/> <path d=\"M22,100 C6,100 0,86 8,76\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"13\" stroke-linecap=\"round\"/> <path d=\"M28,58 l-11,-4 M26,68 l-12,1 M104,56 l11,-4 M104,66 l12,1\" stroke=\"#C87E2B\" stroke-width=\"2.4\" stroke-linecap=\"round\" fill=\"none\" opacity=\"0.65\"/>"},"crouch":{"vb":"0 0 120 104","d":"<path d=\"M18,92 C10,92 6,84 10,74 C18,56 40,46 64,50 C86,54 100,64 102,76 C104,86 98,92 88,92 Z\" fill=\"#E49B41\"/> <path d=\"M96,54 C108,58 114,68 113,78 C112,88 104,93 94,92 C83,91 78,84 79,74 C80,63 88,55 96,54 Z\" fill=\"#E49B41\"/> <path d=\"M80,60 L72,48 L92,48 Z\" fill=\"#E49B41\"/><path d=\"M82.1,57.9 L76.76,50.04 L89.9,50.1 Z\" fill=\"#EFA69C\"/> <path d=\"M104,50 L116,44 L114,60 Z\" fill=\"#E49B41\"/><path d=\"M105.75,51.75 L113.62,47.74 L112.25,58.25 Z\" fill=\"#EFA69C\"/> <ellipse cx=\"97\" cy=\"83\" rx=\"11\" ry=\"7\" fill=\"#FFF1DE\"/> <ellipse cx=\"91.775\" cy=\"72\" rx=\"3.344\" ry=\"4.18\" fill=\"#3B2B1A\"/><ellipse cx=\"104.125\" cy=\"72\" rx=\"3.344\" ry=\"4.18\" fill=\"#3B2B1A\"/><circle cx=\"90.73\" cy=\"70.48\" r=\"1.2349999999999999\" fill=\"#FFFFFF\"/><circle cx=\"103.08\" cy=\"70.48\" r=\"1.2349999999999999\" fill=\"#FFFFFF\"/><path d=\"M96.525,77.7 l3.23,0 l-1.615,2.4699999999999998 Z\" fill=\"#EFA69C\"/> <path d=\"M20,90 C6,92 -2,84 2,74\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"10\" stroke-linecap=\"round\"/>"},"arch":{"vb":"0 0 130 110","d":"<path d=\"M100,78 C110,62 110,40 100,26\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"18\" stroke-linecap=\"round\"/> <path d=\"M110,56 l7,2 M110,38 l7,-4 M96,46 l-7,-2\" stroke=\"#E49B41\" stroke-width=\"4\" stroke-linecap=\"round\" fill=\"none\"/> <path d=\"M26,96 C22,74 32,50 54,42 C74,35 94,44 100,64 C104,78 104,88 102,96 C96,84 84,78 66,80 C46,82 34,88 26,96 Z\" fill=\"#E49B41\"/> <path d=\"M44,46 l-2,-7 M60,41 l0,-7 M76,42 l3,-7 M90,52 l5,-6\" stroke=\"#E49B41\" stroke-width=\"4\" stroke-linecap=\"round\" fill=\"none\"/> <path d=\"M40,86 l-2,12 M56,82 l-1,16 M80,80 l2,18 M96,84 l2,14\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\" fill=\"none\"/> <circle cx=\"30\" cy=\"74\" r=\"17\" fill=\"#E49B41\"/> <path d=\"M18,66 L2,60 L18,54 Z\" fill=\"#E49B41\"/><path d=\"M18.0,63.9 L7.44,60.0 L18.0,56.1 Z\" fill=\"#EFA69C\"/> <path d=\"M34,60 L46,50 L46,64 Z\" fill=\"#E49B41\"/><path d=\"M36.1,60.7 L43.96,54.08 L43.9,63.3 Z\" fill=\"#EFA69C\"/> <ellipse cx=\"23\" cy=\"71\" rx=\"4.4\" ry=\"5.2\" fill=\"#3B2B1A\"/> <ellipse cx=\"37\" cy=\"71\" rx=\"4.4\" ry=\"5.2\" fill=\"#3B2B1A\"/> <circle cx=\"21.8\" cy=\"69\" r=\"1.4\" fill=\"#FFFFFF\"/><circle cx=\"35.8\" cy=\"69\" r=\"1.4\" fill=\"#FFFFFF\"/> <path d=\"M28,78 l4,0 l-2,3 Z\" fill=\"#EFA69C\"/> <path d=\"M22,82 C22,90 38,90 38,82 C38,88 34,91 30,91 C26,91 22,88 22,82 Z\" fill=\"#3B2B1A\"/> <path d=\"M23.5,83 l2,4 l2,-4 Z M34.5,83 l2,4 l2,-4 Z\" fill=\"#FFFFFF\"/>"},"pounce":{"vb":"0 0 120 104","d":"<path d=\"M30,86 C20,86 14,78 18,68 C24,54 40,44 58,44 C76,44 90,52 96,64 C102,76 98,86 88,86 Z\" fill=\"#E49B41\"/> <path d=\"M34,62 C46,64 54,74 52,84 C50,94 40,99 30,96 C20,93 16,84 19,74 C22,65 27,61 34,62 Z\" fill=\"#E49B41\"/> <path d=\"M22,72 L10,64 L22,56 Z\" fill=\"#E49B41\"/><path d=\"M22.0,69.2 L14.08,64.0 L22.0,58.8 Z\" fill=\"#EFA69C\"/> <path d=\"M38,58 L40,44 L52,58 Z\" fill=\"#E49B41\"/><path d=\"M40.45,58.0 L41.7,48.76 L49.55,58.0 Z\" fill=\"#EFA69C\"/> <ellipse cx=\"33\" cy=\"88\" rx=\"11\" ry=\"7\" fill=\"#FFF1DE\"/> <ellipse cx=\"27.775\" cy=\"78\" rx=\"3.344\" ry=\"4.18\" fill=\"#3B2B1A\"/><ellipse cx=\"40.125\" cy=\"78\" rx=\"3.344\" ry=\"4.18\" fill=\"#3B2B1A\"/><circle cx=\"26.73\" cy=\"76.48\" r=\"1.2349999999999999\" fill=\"#FFFFFF\"/><circle cx=\"39.08\" cy=\"76.48\" r=\"1.2349999999999999\" fill=\"#FFFFFF\"/><path d=\"M32.525,83.7 l3.23,0 l-1.615,2.4699999999999998 Z\" fill=\"#EFA69C\"/> <path d=\"M92,60 C104,54 110,40 106,28\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/> <path d=\"M74,84 l0,14 M88,80 l4,18\" stroke=\"#E49B41\" stroke-width=\"9\" stroke-linecap=\"round\" fill=\"none\"/> <path d=\"M22,96 l-8,4 M40,98 l-4,4\" stroke=\"#E49B41\" stroke-width=\"8\" stroke-linecap=\"round\" fill=\"none\"/>"},"curl":{"vb":"0 0 120 104","d":"<ellipse cx=\"60\" cy=\"62\" rx=\"46\" ry=\"38\" fill=\"#E49B41\"/> <path d=\"M22,80 C8,78 0,66 6,54 C10,46 18,44 24,48\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"12\" stroke-linecap=\"round\"/> <ellipse cx=\"76\" cy=\"70\" rx=\"26\" ry=\"22\" fill=\"#FFF1DE\"/> <path d=\"M74,40 C90,40 102,50 102,62 C102,74 92,82 80,82 C68,82 60,73 60,62 C60,50 66,40 74,40 Z\" fill=\"#E49B41\"/> <path d=\"M62,50 L60,34 L76,42 Z\" fill=\"#E49B41\"/><path d=\"M64.45,48.6 L63.06,38.08 L73.55,43.4 Z\" fill=\"#EFA69C\"/> <path d=\"M84,40 L98,34 L100,50 Z\" fill=\"#E49B41\"/><path d=\"M86.8,41.75 L95.96,37.74 L97.2,48.25 Z\" fill=\"#EFA69C\"/> <path d=\"M73,60 q4,4.5 8,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M86,60 q4,4.5 8,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M81.5,66 l3.4,0 l-1.7,2.6 Z\" fill=\"#EFA69C\"/>"},"kitten":{"vb":"0 0 120 104","d":"<path d=\"M60,58 C74,58 84,70 84,84 C84,94 78,100 68,100 L44,100 C36,100 30,94 30,85 C30,70 46,58 60,58 Z\" fill=\"#E49B41\"/> <path d=\"M56,74 C64,80 68,90 66,100 L44,100 C42,88 48,78 56,74 Z\" fill=\"#FFF1DE\"/> <path d=\"M58,20 C78,20 92,34 92,52 C92,68 78,78 58,78 C38,78 24,68 24,52 C24,34 38,20 58,20 Z\" fill=\"#E49B41\"/> <path d=\"M30,32 L26,8 L50,20 Z\" fill=\"#E49B41\"/><path d=\"M33.5,29.9 L30.76,14.120000000000001 L46.5,22.1 Z\" fill=\"#EFA69C\"/> <path d=\"M68,20 L92,8 L88,34 Z\" fill=\"#E49B41\"/><path d=\"M71.5,22.45 L87.24,14.46 L84.5,31.55 Z\" fill=\"#EFA69C\"/> <ellipse cx=\"49.75\" cy=\"48\" rx=\"5.280000000000001\" ry=\"6.6000000000000005\" fill=\"#3B2B1A\"/><ellipse cx=\"69.25\" cy=\"48\" rx=\"5.280000000000001\" ry=\"6.6000000000000005\" fill=\"#3B2B1A\"/><circle cx=\"48.1\" cy=\"45.6\" r=\"1.9500000000000002\" fill=\"#FFFFFF\"/><circle cx=\"67.6\" cy=\"45.6\" r=\"1.9500000000000002\" fill=\"#FFFFFF\"/><path d=\"M57.25,57.0 l5.1,0 l-2.55,3.9000000000000004 Z\" fill=\"#EFA69C\"/> <path d=\"M66,100 C82,102 94,94 94,84\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/> <path d=\"M20,48 l-12,-4 M20,56 l-12,2 M96,48 l12,-4 M96,56 l12,2\" stroke=\"#C87E2B\" stroke-width=\"2.4\" stroke-linecap=\"round\" fill=\"none\" opacity=\"0.7\"/>"},"walk":{"vb":"0 0 120 106","d":"<path d=\"M22,86 C14,86 10,78 14,68 C22,50 44,42 66,46 C84,49 94,60 94,72 C94,82 89,88 80,88 Z\" fill=\"#E49B41\"/> <path d=\"M84,46 C98,50 106,60 106,72 C106,84 98,90 88,88 C77,86 72,78 73,66 C74,54 79,45 84,46 Z\" fill=\"#E49B41\"/> <path d=\"M72,50 L70,30 L88,42 Z\" fill=\"#E49B41\"/><path d=\"M74.8,48.6 L73.4,35.44 L85.2,43.4 Z\" fill=\"#EFA69C\"/> <path d=\"M94,42 L108,32 L108,52 Z\" fill=\"#E49B41\"/><path d=\"M96.45,43.75 L105.62,37.1 L105.55,50.25 Z\" fill=\"#EFA69C\"/> <ellipse cx=\"90\" cy=\"78\" rx=\"11\" ry=\"7\" fill=\"#FFF1DE\"/> <ellipse cx=\"84.5\" cy=\"66\" rx=\"2.32\" ry=\"2.9\" fill=\"#3B2B1A\"/><ellipse cx=\"97.5\" cy=\"66\" rx=\"2.32\" ry=\"2.9\" fill=\"#3B2B1A\"/><path d=\"M89.5,72 l3.4,0 l-1.7,2.6 Z\" fill=\"#EFA69C\"/> <path d=\"M22,84 C18,64 24,44 34,34\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/> <path d=\"M32,86 l-2,14 M52,88 l0,14 M74,86 l2,14 M88,86 l2,14\" stroke=\"#E49B41\" stroke-width=\"9\" stroke-linecap=\"round\" fill=\"none\"/>"},"flop":{"vb":"0 0 120 106","d":"<path d=\"M30,92 C18,92 12,82 18,70 C26,52 50,44 74,48 C94,52 104,64 102,78 C100,88 92,92 82,92 Z\" fill=\"#E49B41\"/> <path d=\"M28,72 C40,74 48,82 46,90 C44,97 34,100 24,97 C14,94 10,86 13,79 C16,72 22,71 28,72 Z\" fill=\"#E49B41\"/> <path d=\"M16,80 L4,74 L16,64 Z\" fill=\"#E49B41\"/><path d=\"M16.0,77.2 L8.08,73.32 L16.0,66.8 Z\" fill=\"#EFA69C\"/> <path d=\"M32,68 L34,54 L46,68 Z\" fill=\"#E49B41\"/><path d=\"M34.45,68.0 L35.7,58.76 L43.55,68.0 Z\" fill=\"#EFA69C\"/> <path d=\"M19.450000000000003,84 q3.8,4.2749999999999995 7.6,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"1.9\" stroke-linecap=\"round\"/><path d=\"M31.8,84 q3.8,4.2749999999999995 7.6,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"1.9\" stroke-linecap=\"round\"/><path d=\"M27.525,89.7 l3.23,0 l-1.615,2.4699999999999998 Z\" fill=\"#EFA69C\"/> <path d=\"M50,86 C56,96 66,98 74,94 M66,88 C72,96 82,96 88,92\" stroke=\"#FFF1DE\" stroke-width=\"9\" stroke-linecap=\"round\" fill=\"none\"/> <path d=\"M100,80 C112,84 116,94 110,100\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/> <path d=\"M44,58 l10,-3 M58,52 l11,-2 M74,50 l11,0\" stroke=\"#C87E2B\" stroke-width=\"3.2\" stroke-linecap=\"round\" fill=\"none\"/>"},"bellyup":{"vb":"0 0 124 104","d":"<path d=\"M26,58 C26,44 40,34 62,34 C84,34 98,44 98,58 C98,74 84,84 62,84 C40,84 26,74 26,58 Z\" fill=\"#E49B41\"/> <ellipse cx=\"62\" cy=\"64\" rx=\"26\" ry=\"17\" fill=\"#FFF1DE\"/> <path d=\"M96,44 C108,44 116,52 116,62 C116,73 107,80 96,79 C85,78 80,70 81,60 C82,50 88,44 96,44 Z\" fill=\"#E49B41\"/> <path d=\"M84,50 L84,34 L100,42 Z\" fill=\"#E49B41\"/><path d=\"M86.8,48.6 L86.72,38.08 L97.2,43.4 Z\" fill=\"#EFA69C\"/> <path d=\"M104,42 L118,36 L116,54 Z\" fill=\"#E49B41\"/><path d=\"M106.1,44.1 L115.28,40.08 L113.9,51.9 Z\" fill=\"#EFA69C\"/> <path d=\"M91,62 q4,4.5 8,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M104,62 q4,4.5 8,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2\" stroke-linecap=\"round\"/><path d=\"M99.5,68 l3.4,0 l-1.7,2.6 Z\" fill=\"#EFA69C\"/> <path d=\"M46,36 l-6,-12 M64,34 l0,-13 M82,36 l5,-12\" stroke=\"#E49B41\" stroke-width=\"9\" stroke-linecap=\"round\" fill=\"none\"/> <path d=\"M28,66 C14,70 6,82 10,92\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/>"},"stalk":{"vb":"0 0 120 104","d":"<path d=\"M24,84 C14,84 8,76 12,68 C20,54 42,46 64,48 C84,50 96,58 98,68 C100,78 94,84 84,84 Z\" fill=\"#E49B41\"/> <path d=\"M96,58 C108,60 114,68 113,76 C112,85 104,90 94,88 C84,86 80,79 82,70 C84,61 90,57 96,58 Z\" fill=\"#E49B41\"/> <path d=\"M82,64 L74,52 L94,52 Z\" fill=\"#E49B41\"/><path d=\"M84.1,61.9 L78.76,54.04 L91.9,54.1 Z\" fill=\"#EFA69C\"/> <path d=\"M104,54 L116,50 L115,64 Z\" fill=\"#E49B41\"/><path d=\"M105.925,55.75 L113.79,53.06 L113.075,62.25 Z\" fill=\"#EFA69C\"/> <ellipse cx=\"92.775\" cy=\"74\" rx=\"3.344\" ry=\"4.18\" fill=\"#3B2B1A\"/><ellipse cx=\"105.125\" cy=\"74\" rx=\"3.344\" ry=\"4.18\" fill=\"#3B2B1A\"/><circle cx=\"91.73\" cy=\"72.48\" r=\"1.2349999999999999\" fill=\"#FFFFFF\"/><circle cx=\"104.08\" cy=\"72.48\" r=\"1.2349999999999999\" fill=\"#FFFFFF\"/><path d=\"M97.525,79.7 l3.23,0 l-1.615,2.4699999999999998 Z\" fill=\"#EFA69C\"/> <path d=\"M22,80 C10,76 4,64 8,54\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"10\" stroke-linecap=\"round\"/> <path d=\"M34,84 l-2,10 M52,86 l0,10 M74,84 l2,10 M90,86 l2,8\" stroke=\"#E49B41\" stroke-width=\"8\" stroke-linecap=\"round\" fill=\"none\"/>"},"groom":{"vb":"0 0 120 104","d":"<path d=\"M24,100 C14,100 8,90 14,76 C24,54 44,42 62,40 C80,38 92,48 92,64 C92,82 84,94 74,100 Z\" fill=\"#E49B41\"/> <path d=\"M62,34 C82,34 96,46 96,62 C96,76 84,86 66,86 C52,86 42,78 40,66 C38,50 46,34 62,34 Z\" fill=\"#E49B41\"/> <path d=\"M42,48 L38,20 L64,32 Z\" fill=\"#E49B41\"/><path d=\"M45.85,45.2 L43.1,26.8 L60.15,34.8 Z\" fill=\"#EFA69C\"/> <path d=\"M76,32 L98,20 L98,48 Z\" fill=\"#E49B41\"/><path d=\"M79.85,34.8 L94.26,26.8 L94.15,45.2 Z\" fill=\"#EFA69C\"/> <path d=\"M59.2,62 q4.8,5.3999999999999995 9.6,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><path d=\"M74.8,62 q4.8,5.3999999999999995 9.6,0\" fill=\"none\" stroke=\"#3B2B1A\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><path d=\"M69.4,69.2 l4.08,0 l-2.04,3.12 Z\" fill=\"#EFA69C\"/> <path d=\"M56,86 C50,92 46,98 46,100 L74,100 C74,94 68,88 56,86 Z\" fill=\"#FFF1DE\"/> <path d=\"M64,78 C58,84 54,90 54,96\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"13\" stroke-linecap=\"round\"/> <path d=\"M24,98 C10,96 4,86 8,76\" fill=\"none\" stroke=\"#E49B41\" stroke-width=\"11\" stroke-linecap=\"round\"/>"}};
+function art(name, h){
+  const a = ART[name]; if(!a) return '';
+  return `<svg viewBox="${a.vb}" role="img" aria-hidden="true" style="height:${h}px;width:auto;display:block">${a.d}</svg>`;
+}
+
+/* =============================================================
+   THE FOLDER, REBUILT.
+   The shelter's own pages are carried over. Everything that was a
+   third-party handout has been rewritten from scratch, restructured,
+   and re-illustrated so the shelter owns what it hands out.
+   ============================================================= */
+const DOCS = [
+{
+  id:'first-48', cat:'Settle in', icon:'home', mins:4, art:'curl',
+  title:'The first 48 hours',
+  sub:'Start small and let them come to you',
+  body:[
+    {t:'callout', v:'Your cat has had a very big week. Somewhere in it were a street or a surrendered home, a shelter, a carrier and a car. The first two days are about turning the volume down on all of it.'},
+    {t:'h', v:'Pick one room before you open the carrier'},
+    {t:'p', v:'Cats read a whole house as territory to be defended, which is exhausting when none of it is familiar. One quiet room is far kinder. Put the litter box in one corner, food and water well away from it, a bed, and something to hide under or inside. Then set the carrier down, open the door, and leave it open.'},
+    {t:'p', v:'Do not tip them out, and do not go looking for them under the bed. Sit on the floor, stay low, talk quietly, and let curiosity do the work. A cat who spends the first evening behind the sofa is behaving completely normally.'},
+    {t:'h', v:'The three signs that it is working'},
+    {t:'p', v:'Forget how affectionate they are for now and watch for these instead. They are eating. They are drinking. They are using the litter box. Once all three are steady, your cat has decided the room is safe.'},
+    {t:'p', v:'Some cats get there in two days. Some take two months. Neither says anything about how the next fifteen years will go.'},
+    {t:'h', v:'Opening up the rest of the house'},
+    {t:'p', v:'When they are relaxed in that room, just open the door and walk away. Let them map the house at their own speed. Leave the room set up exactly as it was — for months, if you can. Every cat does better knowing there is one place that is unarguably theirs.'},
+    {t:'callout', style:'blue', v:'Two things in your folder expire in 7 days: the free vet exam and the free 30-day insurance. Both are on your plan with dates already worked out.'},
+    {t:'h', v:'Making the first vet trip easier'},
+    {t:'p', v:'A clinic is loud, bright and full of strangers and dogs. Leave the carrier out at home with a blanket in it so it stops being a thing that only appears before bad days. Bring treats. Cover the carrier with a towel in the waiting room.'}
+  ]
+},
+{
+  id:'supplies', cat:'Settle in', icon:'bowl', mins:5, art:'loaf',
+  title:'What to buy, and what to skip',
+  sub:'The short list that actually matters',
+  body:[
+    {t:'h', v:'Food, and how to change it'},
+    {t:'p', v:'The shelter will tell you what your cat has been eating. If you want to switch brands, do it over about ten days rather than overnight: roughly a quarter new food at first, then half, then three quarters, then all of it. A slow change keeps their digestion — and their litter box — uneventful.'},
+    {t:'h', v:'Water'},
+    {t:'p', v:'Fresh, always available, and not right next to the food. Some cats drink far more from a moving fountain than a still bowl, which is worth knowing because cats are chronically under-hydrated. If you use a fountain, clean it properly and often.'},
+    {t:'h', v:'Litter boxes — buy one more than you think'},
+    {t:'p', v:'One box per cat, plus one. Two boxes for a single cat. Put them in different parts of the home rather than side by side, so a nervous cat is never cornered on the way to the only toilet.'},
+    {t:'l', v:[
+      'Big enough that the whole cat fits and can turn around with nothing hanging over the edge.',
+      'Skip the hood. It traps smell and it lets another animal wait outside where your cat cannot see them.',
+      'Pick a fine-grained litter and then stop experimenting. Cats form firm opinions about this.',
+      'Scoop daily. Most litter box problems are a review of the housekeeping.'
+    ]},
+    {t:'h', v:'Somewhere to scratch'},
+    {t:'p', v:'Scratching is maintenance, not misbehaviour — it sheds claw sheaths, stretches the back and leaves scent. The only real question is what gets scratched. Offer both a tall vertical post and a flat horizontal pad, put them where your cat actually spends time rather than in the spare room, and the sofa stops being the best option available.'},
+    {t:'callout', v:'The shelter does not support declawing. It removes the last bone of each toe, not just the claw, and it commonly trades a scratched armchair for a cat who bites or stops using the litter box.'},
+    {t:'h', v:'Height'},
+    {t:'p', v:'A tower, a shelf or a cleared windowsill. Vertical space is extra territory, and in a home with more than one animal it is what stops the floor becoming contested ground.'},
+    {t:'h', v:'Toys'},
+    {t:'p', v:'A wand toy is the one thing worth buying properly. Beyond that, cats are famously unimpressed by price. Keep a handful in a drawer and rotate them weekly so nothing is ever quite boring.'}
+  ]
+},
+{
+  id:'reading', cat:'Understand', icon:'heart', mins:5,
+  title:'Reading your cat',
+  sub:'Three states, and what to do in each',
+  body:[
+    {t:'p', v:'Cats talk constantly and almost none of it is out loud. Ears, tail, pupils, posture and where they choose to be tell you what you need to know. The single most useful habit is describing what you can see — "ears flat, tail tucked, pupils huge" — instead of reaching for a word like moody. A description tells you what to do next. A label does not.'},
+    {t:'p', v:'Almost everything you will see falls into one of three states.'},
+    {t:'zone', style:'g', art:'loaf', h:'Settled', p:'Loose, unbothered, taking up space. This is the state you are trying to build more of.', d:[
+      ['What it looks like','Body relaxed or stretched out, tail still or slowly swaying, ears forward, pupils normal, eyes half closed. Sometimes a slow blink, which is as close to a compliment as cats give.'],
+      ['What to do','Nothing. Sit near them, blink slowly back, and let it be uneventful. Time spent boring is time spent building trust.']
+    ]},
+    {t:'zone', style:'y', art:'crouch', h:'Uneasy', p:'Alert and not enjoying it. Nothing has gone wrong yet, and this is the moment where you can stop it going wrong.', d:[
+      ['What it looks like','Body low or shifted away, head turned aside, tail close to the body and flicking, ears rotating out to the sides, pupils widening. Very still, or suddenly grooming in an oddly intense way.'],
+      ['What to do','Find the trigger and remove it, or move your cat away from it. Give them a route out and a place to hide. Do not follow, do not pick them up, and do not try to reassure them by getting closer.']
+    ]},
+    {t:'zone', style:'r', art:'arch', h:'Overwhelmed', p:'Past the point of coping. A cat here may lash out, and that is fear rather than aggression.', d:[
+      ['What it looks like','Pupils fully round and black, ears flat back or sideways, tail tucked or bottle-brushed, body either flattened or arched with the fur up. Growling, hissing, spitting.'],
+      ['What to do','Take the trigger away — the dog, the visitor, the noise. If you cannot, leave the room and let them find their own way to somewhere quiet. Never corner them, never grab them, never punish. Give it hours, not minutes.']
+    ]},
+    {t:'callout', style:'blue', v:'A cat who hisses is not being difficult. Hissing is a warning issued instead of a bite, and it deserves a thank-you and some distance.'},
+    {t:'h', v:'The same thing, part by part'},
+    {t:'p', v:'If you would rather read it as a checklist than a description, this is every signal broken out.'},
+    {t:'pose', art:'loaf', h:'Resting', p:'Settled', d:[
+      ['Eyes','Closed to half open, slow blinking'],['Ears','Normal or gently forward'],
+      ['Tail','Wrapped loosely or extended'],['Body','On the belly or side, no tension'],['Sounds','Silence or purring']]},
+    {t:'pose', art:'sit', h:'Perked and interested', p:'Settled', d:[
+      ['Eyes','Looking directly, not hard'],['Ears','Forward'],
+      ['Tail','Close to the body, may flick'],['Body','Upright, back horizontal'],['Sounds','Quiet, or a chirp']]},
+    {t:'pose', art:'walk', h:'Exploring', p:'Settled', d:[
+      ['Eyes','Open, scanning'],['Ears','Normal or perked'],
+      ['Tail','Up and winding, or loosely down'],['Body','Back horizontal, moving freely'],['Sounds','None, or a meow']]},
+    {t:'pose', art:'crouch', h:'Mildly anxious', p:'Uneasy', d:[
+      ['Eyes','Wide, avoiding eye contact, pupils widening'],['Ears','Rotating out to the sides'],
+      ['Tail','Close to the body, flicking'],['Body','Low, shifted away, head turned aside'],['Sounds','None']]},
+    {t:'pose', art:'stalk', h:'Trying to leave', p:'Uneasy', d:[
+      ['Eyes','Pupils dilated'],['Ears','Back or sideways'],
+      ['Tail','Tight to the body, hair lifting'],['Body','Low and poised to move, weight back'],['Sounds','None, meow, or a hiss']]},
+    {t:'pose', art:'arch', h:'Fight or flight', p:'Overwhelmed', d:[
+      ['Eyes','Fully round and black'],['Ears','Flat back, or forward and hard'],
+      ['Tail','Tucked or bottle-brushed'],['Body','Flattened, or arched with the fur up'],['Sounds','Growling, hissing, spitting']]},
+    {t:'h', v:'When to call someone'},
+    {t:'p', v:'A sudden change is worth a vet visit before it is worth a trainer. Cats hide pain extremely well, and a cat who has started hiding, stopped eating, or begun missing the litter box is often telling you something medical first.'}
+  ]
+},
+{
+  id:'cat-language', cat:'Understand', icon:'sparkle', mins:3,
+  title:'Cat language at a glance',
+  sub:'Twelve things your cat is telling you',
+  body:[
+    {t:'p', v:'A wall chart for your fridge, on your phone. Match what you can see to the nearest picture, then read across.'},
+    {t:'h', v:'Comfortable'},
+    {t:'chart', v:[
+      ['walk','Friendly','Tail straight up, walking to you'],
+      ['sit','Attentive','Sitting tall, ears forward'],
+      ['flop','Relaxed','Stretched out, side down'],
+      ['loaf','Content','Paws tucked, half asleep'],
+      ['bellyup','Trusting','Belly showing — not a rub request'],
+      ['curl','Sleeping','Curled tight, tail over nose']
+    ]},
+    {t:'h', v:'Busy'},
+    {t:'chart', v:[
+      ['pounce','Playful','Rear up, wiggle before the pounce'],
+      ['stalk','Hunting','Low, slow, eyes locked on'],
+      ['groom','Settled in','Grooming means they feel safe']
+    ]},
+    {t:'h', v:'Not coping'},
+    {t:'chart', v:[
+      ['crouch','Anxious','Low and small, ears out sideways'],
+      ['arch','Threatened','Fur up, arched, hissing'],
+      ['flop','Overstimulated','Rolling and swatting mid-stroke']
+    ]},
+    {t:'callout', v:'Belly up is the one people get wrong most often. A cat showing you their belly is telling you they feel safe, not asking to be touched there. Rub the head instead.'}
+  ]
+},
+{
+  id:'play', cat:'Understand', icon:'sparkle', mins:4, art:'pounce',
+  title:'Play, and why it fixes things',
+  sub:'Ten minutes a day changes the whole animal',
+  body:[
+    {t:'p', v:'A toy lying on the carpet is, to a cat, a dead thing. Play only works when it behaves like something alive: small, quiet, moving away, occasionally hiding. What you are staging is a hunt, and the hunt is what gets used up.'},
+    {t:'p', v:'It is also how you bond with a cat who does not want to be held. Plenty of cats will never be lap cats and will still adore the person on the other end of the wand.'},
+    {t:'h', v:'Find out what your cat hunts'},
+    {t:'p', v:'Most cats have a strong preference. Work through these and watch for the one that switches them on:'},
+    {t:'l', v:[
+      'Birds — feathers on a wand, moving in arcs above the ground and landing occasionally.',
+      'Mice — something small dragged along the floor, away from your cat and around corners.',
+      'Bugs — a light toy on a wire, twitched in small jerks. Often the winner for shy cats.',
+      'Snakes — a ribbon or frayed rope pulled in a straight line along the ground.'
+    ]},
+    {t:'chart', v:[
+      ['stalk','The stalk','Low and slow, eyes locked'],
+      ['crouch','The wait','Frozen, deciding'],
+      ['pounce','The pounce','Rear wiggle, then go'],
+      ['groom','The reset','Catch, then a wash']
+    ]},
+    {t:'h', v:'Six things that make it work'},
+    {t:'l', v:[
+      'Move it away from your cat, never towards them. Prey flees.',
+      'Change speed. Long pauses and barely-moving are more exciting than constant motion.',
+      'Let it disappear under a rug or behind a chair. Rustling is half the appeal.',
+      'Keep it a few feet away — cats focus badly on things right under their nose.',
+      'Make them wait. Too easy is boring.',
+      'End with a catch. A hunt with no kill leaves a cat wound up rather than satisfied.'
+    ]},
+    {t:'callout', v:'Laser pointers are the exception worth flagging. The dot can never be caught, and some cats become genuinely obsessive about it. If you use one, finish every session by landing the dot on a real toy they can pin down.'},
+    {t:'h', v:'When to do it'},
+    {t:'p', v:'Before meals and before bed. A hunt followed by food followed by sleep is the natural order of a cat\'s day, and running it deliberately is the single best fix for a cat who wakes you at four in the morning.'}
+  ]
+},
+{
+  id:'introductions', cat:'Understand', icon:'users', mins:6, art:'sit',
+  title:'Meeting the other animals',
+  sub:'Five stages, and the rule about not skipping any',
+  body:[
+    {t:'p', v:'Cats are territorial, and a resident cat did not ask for a flatmate. Done slowly, most pairs settle into somewhere between tolerance and genuine friendship. Done quickly, you can create a conflict that lasts for years. The whole method is: let them learn about each other through a closed door until the meeting is boring.'},
+    {t:'p', v:'A confident young cat might need a week. An older cat who has never lived with another animal can need two months. Go at the pace of whichever animal is finding it harder.'},
+    {t:'h', v:'Stage 1 — Separate'},
+    {t:'p', v:'The new cat stays in the sanctuary room with the door shut. Nobody sees anybody. This alone often takes several days.'},
+    {t:'h', v:'Stage 2 — Eat on either side of the door'},
+    {t:'p', v:'Feed both animals near the closed door, far enough back that both can actually eat. Each day move the bowls slightly closer. You are teaching both cats that the other one\'s smell arrives with dinner. If either stops eating, you have moved too fast — go back a step.'},
+    {t:'h', v:'Stage 3 — Swap scents and swap rooms'},
+    {t:'p', v:'Trade blankets between them. Rub a soft cloth on one cat and leave it under the other\'s bowl. Then let the new cat explore the house while the resident cat spends time in the sanctuary room. They learn the whole map of each other without a face to attach it to.'},
+    {t:'h', v:'Stage 4 — See but not reach'},
+    {t:'p', v:'Crack the door and wedge it, or use a baby gate or a screen. Keep it short and end while it is still going well. Feed treats on both sides so the sight of the other cat predicts something good.'},
+    {t:'h', v:'Stage 5 — Same room'},
+    {t:'p', v:'Short and supervised, with an obvious exit for both. Build up by how they behave, not by the calendar. Two cats ignoring each other in the same room is a complete success.'},
+    {t:'callout', v:'If a fight starts, never reach in with your hands. Make a sharp noise, or drop a blanket or a cushion between them, then separate them and go back several stages. Punishment does not work here and reliably makes things worse.'},
+    {t:'h', v:'While all this is going on'},
+    {t:'l', v:[
+      'One litter box per cat plus one, and cleaned more often than usual.',
+      'Every cat needs a hiding place and a high place the other cannot follow them to.',
+      'Keep your resident cat\'s routine exactly as it was. They have lost enough already.',
+      'Have both animals checked by a vet. Pain is a common hidden reason introductions stall.'
+    ]},
+    {t:'h', v:'Dogs'},
+    {t:'p', v:'Same stages, with the dog on a lead throughout and the cat always given an escape route and high ground. The bar is a dog who can be calm and ignore the cat on command before they are ever loose in the same room together.'}
+  ]
+},
+{
+  id:'myths', cat:'Understand', icon:'book', mins:3, art:'kitten',
+  title:'Five things people get wrong',
+  sub:'Common advice that is not true',
+  body:[
+    {t:'h', v:'"Cats need milk"'},
+    {t:'p', v:'Adult cats are lactose intolerant. A saucer of milk is a stomach upset with extra steps.'},
+    {t:'h', v:'"A bit of tuna is fine"'},
+    {t:'p', v:'As an occasional treat, mostly. As a habit, no — human food is not balanced for cats, and a tuna habit in particular displaces the nutrition they actually need. Complete commercial cat food exists precisely because getting feline nutrition right by hand is very hard.'},
+    {t:'h', v:'"One of them is the alpha"'},
+    {t:'p', v:'Cats do not have a pack hierarchy. Their relationships are fluid and mostly negotiated around time and space rather than rank. One cat being bolder does not make them the boss, and treating them as if it does will not resolve anything.'},
+    {t:'h', v:'"Cats are low maintenance"'},
+    {t:'p', v:'They are quieter than dogs and they do not need walking. They still need daily play, clean boxes, annual vet care, company, and someone to notice quickly when something is wrong.'},
+    {t:'h', v:'"You cannot train a cat"'},
+    {t:'p', v:'You absolutely can, with food and a marker sound. Cats learn to come when called, go into a carrier, sit on a scale and accept nail trims. Clicker training is also one of the better ways to build confidence in a fearful cat.'}
+  ]
+},
+{
+  id:'profile', cat:'Your pet', icon:'paw', mins:2, 
+  title:'Your pet\'s shelter profile',
+  sub:'The page with their photo and history',
+  body:[
+    {t:'profile'},
+    {t:'p', v:'This is the sheet the shelter printed with your pet\'s photo, identifiers and the story of how they arrived. It is the one page people most regret losing, because a microchip number and a foster carer\'s notes are very hard to reconstruct later.'},
+    {t:'story'},
+    {t:'callout', style:'blue', v:'Every field here can be edited under Record, and shared with a vet in one tap.'}
+  ]
+},
+{
+  id:'rabies', cat:'Health & law', icon:'syringe', mins:3,
+  title:'Rabies and your pet licence',
+  sub:'Both are legally required here',
+  body:[
+    {t:'notice'},
+    {t:'h', v:'The law'},
+    {t:'p', v:'Under the Code of the King County Board of Health, Chapter 8.04, every dog, cat and ferret four months or older in King County must be vaccinated against rabies and kept current with boosters. Any vet or animal clinic can give it. The first shot is repeated after one year, then boosted on the schedule your vet sets.'},
+    {t:'h', v:'Why an indoor cat still needs it'},
+    {t:'p', v:'Bats in King County carry rabies, and they get into houses and apartments. A cat who never goes outside can still catch one in the living room.'},
+    {t:'h', v:'Your pet licence'},
+    {t:'p', v:'Cats and dogs living in Seattle must be licensed. The licence pays for the shelter\'s own work — rescue, cruelty investigations, and the low-cost spay and neuter clinic — and it gets lost pets home faster than a microchip alone, because anyone who finds your cat can read the tag without a scanner.'},
+    {t:'callout', style:'blue', v:'Public Health — Seattle & King County, Environmental Health Services. 401 Fifth Avenue, Suite 1100, Seattle WA 98104. (206) 263-9566. Pet licensing: (206) 386-4262.'}
+  ]
+},
+{
+  id:'free-exam', cat:'Health & law', icon:'shield', mins:3,
+  title:'Your free health exam',
+  sub:'Use it within 7 days',
+  body:[
+    {t:'callout', v:'Call a participating vet within 7 days of your adoption date. This is the most time-sensitive thing in the whole folder.'},
+    {t:'cert'},
+    {t:'p', v:'The certificate in your packet covers one free physical examination by a participating member of the Washington State Veterinary Medical Association, donated as a community service through the Washington State Animal Health Foundation.'},
+    {t:'p', v:'Treat it as a no-obligation interview. You are meeting a vet you might use for the next fifteen years, and getting your new-cat questions answered by someone with their hands on the animal.'},
+    {t:'h', v:'Booking it'},
+    {t:'p', v:'WSVMA cannot book for you. Find a member through their "Find a Veterinarian" directory or search clinics near you, then call and ask whether they accept the certificate before you make the appointment. Not every clinic does.'},
+    {t:'h', v:'What it does not cover'},
+    {t:'p', v:'Treatment, hospitalisation, vaccinations, emergency visits and any medication. If you already have a specific worry, say so when you call so they book the right kind of appointment.'},
+    {t:'h', v:'What they will ask for'},
+    {t:'p', v:'Breed, age, sex, your name, phone and address, the microchip number, and the adoption date and agency. All of it is under Record in this app — read it off the screen or share it straight to the clinic.'}
+  ]
+},
+{
+  id:'sas-year', cat:'Health & law', icon:'leaf', mins:3,
+  title:'What the shelter still does for you',
+  sub:'Long after the adoption is finished',
+  body:[
+    {t:'p', v:'The Seattle Animal Shelter is not only where your cat came from. Most of these are open to any Seattle pet owner, and most people never find out they exist.'},
+    {t:'h', v:'If money gets tight'},
+    {t:'p', v:'There is a pet food bank, a list of low-cost services and support, and a spay and neuter clinic that works on a sliding scale down to free where there is genuine need. Free and low-cost vaccination clinics run through the year.'},
+    {t:'h', v:'If your housing changes'},
+    {t:'p', v:'The shelter keeps a housing rights and resources page for renters with pets, and runs temporary crisis care for people who need their animal looked after for a while rather than given up. Ask before you conclude you have to rehome.'},
+    {t:'h', v:'If you need advice'},
+    {t:'p', v:'There are behaviour and training resources, critter care guides for rabbits and small animals, off-leash area maps, severe weather guidance, and a pet loss support group for when the time comes.'},
+    {t:'callout', style:'blue', v:'Seattle Animal Shelter, 2061 15th Ave W, Seattle WA 98119. (206) 386-PETS (7387). Every link above is in the Nearby tab.'}
+  ]
+}
+];
+
+/* Curated onward links — from the shelter's Cat Behavior Resources sheet */
+const LINKS = [
+  {g:'Everyday care', items:[
+    ['General cat care','https://www.aspca.org/pet-care/cat-care/general-cat-care'],
+    ['Grooming tips','https://www.aspca.org/pet-care/cat-care/cat-grooming-tips'],
+    ['DIY enrichment ideas','https://www.aspca.org/pet-care/cat-care/feline-diy-enrichment'],
+    ['Disaster preparedness','https://www.aspca.org/pet-care/general-pet-care/disaster-preparedness']
+  ]},
+  {g:'Common problems', items:[
+    ['Litter box problems','https://www.aspca.org/pet-care/cat-care/common-cat-behavior-issues/litter-box-problems'],
+    ['Destructive scratching','https://www.aspca.org/pet-care/cat-care/common-cat-behavior-issues/destructive-scratching'],
+    ['Urine marking','https://www.aspca.org/pet-care/cat-care/common-cat-behavior-issues/urine-marking-cats'],
+    ['Aggression and body language','https://www.aspca.org/pet-care/cat-care/common-cat-behavior-issues/aggression-cats'],
+    ['Overstimulation','https://www.maddiesfund.org/cat-overstimulation.htm?p=topic1011'],
+    ['Hiding behaviour','https://www.maddiesfund.org/cat-hiding-behavior.htm?p=topic1011']
+  ]},
+  {g:'Multi-pet homes', items:[
+    ['Introducing a new cat into the home','https://cattledogpublishing.com/blog/introducing-a-new-cat-into-the-home/'],
+    ['Help for the multi-cat household','https://cattledogpublishing.com/blog/why-cant-we-all-just-get-along-help-for-the-multi-cat-household/'],
+    ['Introducing cats to other cats','https://www.maddiesfund.org/introducing-cats-to-other-cats.htm?p=topic1011'],
+    ['Adopting a fearful cat','https://www.maddiesfund.org/adopting-a-fearful-cat.htm?p=topic1011'],
+    ['Cats and babies','https://www.aspca.org/pet-care/cat-care/cats-and-babies']
+  ]},
+  {g:'Cats and kids at home', items:[
+    ['Seattle Animal Shelter','https://www.seattleanimalshelter.org'],
+    ['Dumb Friends League pet resources','https://www.ddfl.org/pet-resources/'],
+    ['Maddie\'s Fund behaviour library','https://www.maddiesfund.org']
+  ]}
+];
+
+/* Video walkthroughs — search links so they never rot */
+const VIDEOS = [
+  {t:'Setting up a sanctuary room', q:'cat sanctuary room setup new adopted cat', by:'Jackson Galaxy and others'},
+  {t:'Cat-to-cat introductions, step by step', q:'how to introduce cats to each other slowly jackson galaxy', by:'Jackson Galaxy'},
+  {t:'Introducing a cat and a resident dog', q:'introducing a cat to a dog safely training', by:'Various trainers'},
+  {t:'How to play with your cat properly', q:'how to play with your cat wand toy technique mikel delgado', by:'Dr. Mikel Delgado'},
+  {t:'Getting a cat used to a carrier', q:'cat carrier training reduce vet stress fear free', by:'Fear Free / vets'},
+  {t:'Trimming cat claws at home', q:'how to trim cat nails at home step by step vet', by:'Veterinary channels'},
+  {t:'Litter box setup and troubleshooting', q:'cat litter box setup problems solutions vet advice', by:'Veterinary channels'},
+  {t:'Kitten care in the first weeks', q:'new kitten care first weeks checklist vet', by:'Veterinary channels'}
+];
+/* =============================================================
+   DIRECTORY — verified organisations only. Nothing invented.
+   ============================================================= */
+const DIRECTORY = [
+  { id:'poison', urgent:true, cat:'Emergency',
+    name:'ASPCA Animal Poison Control',
+    note:'24/7, every day of the year. A consultation fee may apply.',
+    tel:'8884264435', url:'https://www.aspca.org/pet-care/animal-poison-control' },
+  { id:'veg', urgent:true, cat:'Emergency',
+    name:'Veterinary Emergency Group — Seattle',
+    addr:'1827 15th Ave W, Seattle, WA 98119',
+    note:'Walk-in emergency care. Two minutes from the shelter.',
+    tel:'5648884898', url:'https://veterinaryemergencygroup.com/locations/seattle-wa/' },
+  { id:'amc', urgent:true, cat:'Emergency',
+    name:'Animal Medical Center of Seattle',
+    addr:'17518 15th Ave NE, Shoreline, WA 98155',
+    note:'Emergency and critical care, staffed 24 hours a day.',
+    tel:'2062043366', url:'https://www.animalmedicalspecialists.com/services/emergency' },
+
+  { id:'sas', cat:'Your shelter',
+    name:'Seattle Animal Shelter',
+    addr:'2061 15th Ave W, Seattle, WA 98119',
+    note:'Adoptions, lost and found, licensing and animal control.',
+    tel:'2063867387', url:'https://www.seattleanimalshelter.org' },
+  { id:'sasclinic', cat:'Spay / neuter',
+    name:'SAS Spay and Neuter Clinic',
+    addr:'2061 15th Ave W, Seattle, WA 98119',
+    note:'Low or no-cost surgeries for any dog or cat in need. Appointment only — no walk-ins.',
+    tel:'2063864260', url:'https://www.seattle.gov/animal-shelter/spay-and-neuter',
+    email:'spayneuterclinic@seattle.gov' },
+  { id:'license', cat:'Your shelter',
+    name:'Seattle pet licensing',
+    note:'Cats and dogs in Seattle must be licensed. Buy or renew online.',
+    tel:'2063864262', url:'https://www.seattle.gov/animal-shelter/license',
+    email:'petlicensing@seattle.gov' },
+
+  { id:'humane', cat:'Spay / neuter',
+    name:'Seattle Humane — Spay and Neuter Clinic',
+    addr:'13212 SE Eastgate Way, Bellevue, WA 98005',
+    note:'Reduced-cost surgeries for income-qualifying King County households.',
+    tel:'4256497561', url:'https://www.seattlehumane.org/services/veterinary-care-center/spay-neuter/' },
+  { id:'feralcat', cat:'Spay / neuter',
+    name:'Feral Cat Spay/Neuter Project',
+    addr:'4001 198th St SW, Suite 3, Lynnwood, WA 98036',
+    note:'Low-cost surgeries. Reservation required.',
+    tel:'4256732287', url:'https://www.feralcatproject.org' },
+  { id:'paws', cat:'Spay / neuter',
+    name:'PAWS Spay/Neuter Clinic',
+    addr:'15305 44th Ave W, Lynnwood, WA 98087',
+    note:'For qualifying low-income households, by appointment.',
+    tel:'4257872500', url:'https://www.paws.org' },
+  { id:'foodbank', cat:'Shelter support',
+    name:'Pet Food Bank',
+    note:'Free pet food for Seattle households who need it. No one should give up a pet over the cost of feeding them.',
+    url:'https://www.seattle.gov/animal-shelter/resources/pet-food-bank' },
+  { id:'vaxclinic', cat:'Shelter support',
+    name:'Free and low-cost vaccination clinics',
+    note:'Run through the year by the shelter. The easiest way to get a rabies shot done.',
+    url:'https://www.seattle.gov/animal-shelter/resources/pet-vaccination-clinics' },
+  { id:'lowcost', cat:'Shelter support',
+    name:'Low-cost services and support',
+    note:'The shelter\'s own list of help with vet bills, food, supplies and care.',
+    url:'https://www.seattle.gov/animal-shelter/resources/low-cost-pet-services-and-support' },
+  { id:'housing', cat:'Shelter support',
+    name:'Housing rights for renters with pets',
+    note:'Before you conclude you have to rehome, read this.',
+    url:'https://www.seattle.gov/animal-shelter/resources/housing-rights-and-resources' },
+  { id:'crisis', cat:'Shelter support',
+    name:'Temporary crisis care',
+    note:'Short-term care for your pet during a crisis, instead of surrender.',
+    url:'https://www.seattle.gov/animal-shelter/resources/temporary-crisis-care' },
+  { id:'behavior', cat:'Shelter support',
+    name:'Behaviour and training resources',
+    note:'Vetted guidance from the shelter for when something is not going right.',
+    url:'https://www.seattle.gov/animal-shelter/resources/training-and-behavior' },
+  { id:'petloss', cat:'Shelter support',
+    name:'Pet loss support group',
+    note:'For much later, and worth knowing it is here.',
+    url:'https://www.seattle.gov/animal-shelter/resources/pet-loss-support-group' },
+
+  { id:'kcresources', cat:'Spay / neuter',
+    name:'King County spay and neuter list',
+    note:'The county\'s full list of clinics offering low-cost or free surgery.',
+    url:'https://kingcounty.gov/en/dept/executive-services/animals-pets-pests/regional-animal-services/spay-neuter-resources' }
+];
+
+/* =============================================================
+   PET STORES — chains with real store locators. Searched by the
+   adopter's ZIP so the results are always current.
+   ============================================================= */
+const STORES = [
+  { name:'Mud Bay', note:'Employee-owned, Pacific Northwest only, and the shop behind the coupon in your folder. Staff train for a year in pet nutrition.', url:'https://www.mudbay.com', tag:'Your coupon works here' },
+  { name:'Petco', note:'Wide stock, often open late, and most branches have a vaccination clinic.', url:'https://www.petco.com/shop/en/petcostore/store-locator' },
+  { name:'PetSmart', note:'Big-box option, useful for larger furniture like towers and cat trees.', url:'https://www.petsmart.com/stores/' },
+  { name:'Chewy', note:'Delivered. Worth it for litter and cans, which are heavy and boring to carry.', url:'https://www.chewy.com' }
+];
+
+/* =============================================================
+   PERKS — everything of monetary value in the packet
+   ============================================================= */
+const PERKS = [
+  { id:'wsvma', kind:'Included with adoption', title:'Free health exam', by:'Washington State Veterinary Medical Association',
+    body:'One free physical examination with a participating WSVMA member vet. Does not cover treatment, vaccines or medication.',
+    deadline:7, deadlineLabel:'Call within 7 days of adoption',
+    action:{label:'Find a participating vet', url:'https://wsvma.org'} },
+  { id:'mudbay', kind:'Coupon', title:'20% off at Mud Bay', by:'Mud Bay · one per household',
+    body:'20% off a purchase of $50 or more — and Mud Bay donates 10% of what you spend back to Pacific Northwest shelter animals. Use it in store or online. One per household, cannot be combined with other promotions.',
+    code:'MBSP20', deadline:30, deadlineLabel:'Expires 30 days from your adoption', qr:true,
+    action:{label:'Shop MudBay.com', url:'https://www.mudbay.com'} },
+  { id:'insurance', kind:'Included with adoption', title:'30 days of free pet insurance', by:'24HourPetwatch / PetHealth',
+    body:'A free 30-day insurance policy comes with your adoption if you consented to the email. It has to be activated — it does not start on its own.',
+    deadline:7, deadlineLabel:'Activate within 7 days',
+    action:{label:'Activate the policy', url:'https://www.24hourpetwatch.com'} },
+  { id:'rover', kind:'When you need a hand', title:'Sitters, walkers and drop-ins', by:'Rover',
+    body:'For work trips, long days and the first holiday. Search sitters near you, read reviews, and book someone who has met your cat before you actually need them.',
+    action:{label:'Find a sitter near you', url:'https://www.rover.com'} }
+];
+
+/* =============================================================
+   CHECKLIST — offsets are days from the adoption date
+   ============================================================= */
+const PHASES = [
+  {id:'today',  label:'Today',            hint:'Before you go to bed tonight'},
+  {id:'week',   label:'Your first week',  hint:'Two items here have hard 7-day deadlines'},
+  {id:'month',  label:'Your first month', hint:'Legal and identity paperwork'},
+  {id:'ongoing',label:'Keep it going',    hint:'Set once, and forget about it'}
+];
+
+const TASKS = [
+  { id:'sanctuary', phase:'today', due:0, icon:'home', t:'Set up the sanctuary room',
+    why:'One quiet room with litter, food, water, a bed and a hiding place. Open the carrier there and let your cat come out on their own.', doc:'first-days' },
+  { id:'photo', phase:'today', due:0, icon:'cam', t:'Take your day-one photo',
+    why:'You get exactly one first day. Take it before the carrier is even put away.', act:'photo' },
+  { id:'supplies', phase:'today', due:0, icon:'bowl', t:'Check off the starter supplies',
+    why:'Two litter boxes, a scratcher, the food you were sent home with, and a wand toy will get you through the first week.', doc:'supplies' },
+  { id:'contacts', phase:'today', due:0, icon:'phone', t:'Save the emergency numbers',
+    why:'Poison control and the nearest 24-hour hospital, in your phone, before you need them.', act:'tab:nearby' },
+
+  { id:'exam', phase:'week', due:7, hard:true, icon:'shield', t:'Book the free vet exam',
+    why:'Your WSVMA certificate has to be used within 7 days. Call and ask whether the clinic accepts it before you book.', doc:'free-exam', act:'tab:nearby' },
+  { id:'insurance', phase:'week', due:7, hard:true, icon:'gift', t:'Activate the free 30-day insurance',
+    why:'The 24HourPetwatch policy included with your adoption expires unclaimed if you do not turn it on within 7 days.', act:'perk:insurance' },
+  { id:'food', phase:'week', due:5, icon:'bowl', t:'Start the food transition',
+    why:'Only if you are switching brands. 25% new food, then 50%, then 75% over about a week and a half.', doc:'supplies' },
+  { id:'intro', phase:'week', due:7, icon:'users', t:'Begin resident-pet introductions',
+    why:'Scent swapping and feeding on opposite sides of a closed door. Do not let them meet face to face yet.', doc:'introductions' },
+
+  { id:'rabies', phase:'month', due:30, icon:'syringe', t:'Rabies vaccination',
+    why:'Required by King County Board of Health Code 8.04 for every cat, dog and ferret over four months. Check your paperwork — if the shelter did not give it, it is on you.', doc:'rabies' },
+  { id:'license', phase:'month', due:30, icon:'tag', t:'Buy a Seattle pet license',
+    why:'Cats and dogs living in Seattle must be licensed. The fee funds the shelter\'s spay/neuter clinic and rescue work.', act:'dir:license' },
+  { id:'microchip', phase:'month', due:14, icon:'chip', t:'Transfer the microchip registration',
+    why:'The chip is already in your pet, but it still points at the shelter. Register it in your name or it cannot bring your pet home.' },
+  { id:'spay', phase:'month', due:30, icon:'heart', t:'Spay or neuter, if not already done',
+    why:'Most shelter pets come already altered — check your record. If not, the shelter\'s own clinic does it at low or no cost.', act:'dir:sasclinic' },
+
+  { id:'booster', phase:'ongoing', due:365, icon:'syringe', t:'Rabies booster, one year on',
+    why:'The first rabies shot has to be repeated after a year, then kept current with boosters on your vet\'s schedule.' },
+  { id:'annual', phase:'ongoing', due:365, icon:'cal', t:'Annual wellness exam',
+    why:'One visit a year lets your vet catch changes early, while they are still cheap and easy to treat.' },
+  { id:'renew', phase:'ongoing', due:365, icon:'tag', t:'Renew the pet license',
+    why:'One and two-year licenses are available. Late renewals collect penalties.' },
+  { id:'gotcha', phase:'ongoing', due:365, icon:'sparkle', t:'Celebrate the gotcha day',
+    why:'One year since the day in this app. Worth a treat and a photo in the same spot.' }
+];
+
+/* The nine pages the shelter rep walks through at the counter.
+   Each one links to its rebuilt version in the app. */
+const REVIEW = [
+  ['r1','Your pet\'s shelter profile and history', 'profile'],
+  ['r2','Settling in: the first 48 hours', 'first-48'],
+  ['r3','Supplies, food, litter and scratching', 'supplies'],
+  ['r4','Reading your cat\'s body language', 'reading'],
+  ['r5','Cat language at a glance', 'cat-language'],
+  ['r6','Play and enrichment', 'play'],
+  ['r7','Introducing your cat to other pets', 'introductions'],
+  ['r8','Rabies notice and pet licensing', 'rabies'],
+  ['r9','Certificate for a free health exam', 'free-exam'],
+  ['r10','Mud Bay coupon and adopter perks', null]
+];
+/* =============================================================
+   STATE
+   ============================================================= */
+const BLANK = {
+  v:2, started:false, adoptedAt:null,
+  pet:{ shelterName:'', name:'', keepName:true, species:'Cat', id:'', microchip:'', breed:'', color:'', sex:'', age:'', weight:'', rabies:'unknown', altered:'unknown', story:'', photo:'', dayOnePhoto:'' },
+  owner:{ name:'', phone:'', email:'', address:'', city:'Seattle', state:'WA', zip:'' },
+  vet:{ mode:'', name:'', phone:'', address:'' },
+  tasks:{}, acks:{},
+  adopter:{ confirmedAt:'' },
+  staff:{ name:'', signedAt:'' },
+  base:'',
+  screen:'welcome', tab:'home', step:0
+};
+let S = JSON.parse(JSON.stringify(BLANK));
+let storeOK = true;
+
+async function load(){
+  try{
+    const r = await window.storage.get('firstday:record');
+    if(r && r.value){ S = Object.assign(JSON.parse(JSON.stringify(BLANK)), JSON.parse(r.value)); }
+  }catch(e){ /* no saved record yet, or storage unavailable */ }
+}
+let saveTimer;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{ await window.storage.set('firstday:record', JSON.stringify(S)); }
+    catch(e){ if(storeOK){ storeOK=false; console.warn('Storage unavailable — this session only.'); } }
+  }, 250);
+}
+
+/* =============================================================
+   HELPERS
+   ============================================================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY = 86400000;
+const petName = () => S.pet.name || S.pet.shelterName || 'your pet';
+const adoptDate = () => S.adoptedAt ? new Date(S.adoptedAt) : new Date();
+const daysSince = () => Math.max(0, Math.floor((Date.now() - adoptDate().getTime())/DAY));
+const dueDate = off => new Date(adoptDate().getTime() + off*DAY);
+const fmtDate = d => d.toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
+const fmtDateTime = d => d.toLocaleString('en-US',{dateStyle:'medium', timeStyle:'short'});
+const fmtPhone = t => t && t.length===10 ? `(${t.slice(0,3)}) ${t.slice(3,6)}-${t.slice(6)}` : t;
+
+function dueLabel(off){
+  const d = dueDate(off), left = Math.ceil((d - Date.now())/DAY);
+  if(off===0) return {txt:'Today', cls:''};
+  if(left < 0) return {txt:`${Math.abs(left)} day${Math.abs(left)===1?'':'s'} overdue`, cls:'pill-rust'};
+  if(left === 0) return {txt:'Due today', cls:'pill-rust'};
+  if(left <= 3) return {txt:`${left} day${left===1?'':'s'} left`, cls:'pill-gold'};
+  return {txt:`By ${fmtDate(d)}`, cls:''};
+}
+
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* Downscale an uploaded photo so it fits comfortably in storage */
+function readPhoto(file, cb){
+  const fr = new FileReader();
+  fr.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 900, sc = Math.min(1, max/Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      cb(c.toDataURL('image/jpeg', .82));
+    };
+    img.onerror = () => toast('That file could not be read as an image.');
+    img.src = fr.result;
+  };
+  fr.onerror = () => toast('That file could not be read.');
+  fr.readAsDataURL(file);
+}
+
+/* Calendar file — works offline, imports into any calendar app */
+function ics(title, date, desc){
+  const dt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const end = new Date(date.getTime()+3600000);
+  const body = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//First Day//Seattle Animal Shelter//EN','BEGIN:VEVENT',
+    'UID:'+Date.now()+'@firstday','DTSTAMP:'+dt(new Date()),'DTSTART:'+dt(date),'DTEND:'+dt(end),
+    'SUMMARY:'+title.replace(/[,;]/g,''),
+    'DESCRIPTION:'+String(desc||'').replace(/[,;]/g,'').replace(/\n/g,'\\n'),
+    'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+title.replace(/[,;]/g,''),'END:VALARM',
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  download(new Blob([body],{type:'text/calendar'}), title.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.ics');
+  toast('Reminder downloaded — open it to add to your calendar');
+}
+function download(blob, filename){
+  const u = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = u; a.download = filename; document.body.appendChild(a); a.click();
+  a.remove(); setTimeout(()=>URL.revokeObjectURL(u), 1000);
+}
+/* =============================================================
+   THE MARK — a seated dog in profile, with a seated cat held
+   inside it as negative space. Used as the QR centre and as the
+   app's badge. Drawn as paths so it scales to any size.
+   ============================================================= */
+const DOG_BODY = "M118,34 C118,29 114,26 108,25 C101,24 96,24 93,25 C91,19 87,13 81,11 L73,0 L61,19 C57,25 56,33 59,41 C55,46 53,52 53,59 C44,63 35,71 29,83 C24,93 22,104 23,111 C13,107 3,110 1,118 C-1,126 5,131 13,128 C20,125 26,120 28,113 C30,118 35,122 43,122 L73,122 C78,122 80,119 79,114 C81,110 85,109 89,112 C93,116 97,120 103,122 C109,122 111,119 109,114 C103,104 99,92 99,80 C99,70 101,62 104,56 C97,55 91,53 89,49 C95,45 105,44 111,43 C115,42 118,39 118,34 Z";
+const DOG_EYE  = {cx:87, cy:25, r:2.8};
+const CAT_BODY = "M93,24 L97,2 L79,16 C73,14 67,14 61,16 L43,2 L47,26 C42,31 40,38 42,45 C34,50 26,59 21,71 C16,83 13,97 13,107 C13,114 17,118 24,118 L78,118 C84,118 86,115 84,110 C79,99 77,84 79,70 C81,60 84,54 88,50 C92,46 96,42 97,35 C98,30 96,26 93,24 Z";
+const CAT_TAIL = "M22,116 C10,118 2,110 4,98 C6,88 13,84 19,86 C13,88 10,96 12,102 C14,109 18,113 24,113 Z";
+const CAT_EYE  = {cx:88, cy:28, r:2.6};
+/* Dog is drawn in a -2 0 126 130 box, cat in 0 0 112 126. These transforms
+   normalise both into the 120x120 box the marks and QR centre use. */
+const DOG_TF = "translate(5,0) scale(0.9375)";
+const CAT_TF = "translate(40,54) scale(0.40)";
+const CAT_SOLO_TF = "translate(4,0) scale(0.952)";
+
+/* Seattle Animal Shelter mark: the shelter's own seated-dog silhouette with
+   the cat carried inside it, traced to vector so it stays crisp at any size. */
+const MARK_PATH = "M73.1,0.41Q73.41,0.83 74.56,4.68Q75.7,8.53 76.22,9.36Q76.74,10.19 77.06,10.19Q77.37,10.19 78.93,10.71Q80.49,11.23 82.47,12.27Q84.44,13.31 85.16,14.14Q85.89,14.97 86.52,16.01Q87.14,17.05 87.77,17.68Q88.39,18.3 90.67,19.13Q92.96,19.97 95.25,20.59Q97.54,21.21 98.69,21.73Q99.83,22.25 100.25,22.66Q100.66,23.08 100.66,24.12Q100.66,25.16 100.45,25.79Q100.24,26.41 99.0,28.18Q97.75,29.95 97.12,30.47Q96.5,30.99 95.46,31.41Q94.42,31.82 93.38,32.03Q92.34,32.24 89.43,32.45Q86.52,32.65 85.89,32.86Q85.27,33.07 84.95,33.48Q84.64,33.9 84.64,34.94Q84.64,35.98 85.47,39.62Q86.31,43.26 86.62,45.75Q86.93,48.25 87.03,48.36Q87.14,48.46 87.14,49.19Q87.14,49.91 87.25,50.02Q87.35,50.12 87.45,54.28Q87.56,58.44 87.25,60.0Q86.93,61.56 86.52,62.81Q86.1,64.06 83.81,68.84Q81.53,73.62 80.91,75.28Q80.28,76.95 79.97,78.41Q79.65,79.86 79.65,87.56Q79.65,95.25 79.75,95.35Q79.86,95.46 79.97,101.7Q80.07,107.94 80.17,108.05Q80.28,108.15 80.28,108.88Q80.28,109.6 80.59,111.16Q80.9,112.72 81.53,114.07Q82.15,115.42 82.88,116.25Q83.6,117.09 83.6,117.92Q83.6,118.75 83.19,119.16Q82.77,119.58 82.15,119.79Q81.53,120.0 80.28,119.9Q79.03,119.79 77.88,119.27Q76.74,118.75 76.11,118.03Q75.49,117.3 75.18,116.57Q74.87,115.84 74.14,112.2Q73.41,108.56 73.31,107.41Q73.21,106.27 73.0,105.65Q72.79,105.03 72.58,103.26Q72.37,101.49 72.27,101.38Q72.17,101.28 72.17,100.66Q72.17,100.03 72.06,99.93Q71.96,99.83 71.64,97.02Q71.33,94.21 71.23,94.1Q71.13,94.0 71.13,93.28Q71.13,92.55 71.03,92.44Q70.92,92.34 70.92,91.51Q70.92,90.68 70.81,90.58Q70.71,90.47 71.44,87.87Q72.17,85.27 72.17,82.88Q72.17,80.49 71.75,78.51Q71.33,76.53 70.6,74.56Q69.88,72.58 69.88,71.64Q69.88,70.71 70.09,70.4Q70.29,70.09 70.71,69.88Q71.13,69.67 72.38,69.56Q73.62,69.46 74.56,68.94Q75.49,68.42 76.01,67.8Q76.53,67.18 76.74,66.66Q76.95,66.14 77.37,65.62Q77.78,65.1 77.88,64.68Q77.99,64.26 77.16,62.7Q76.33,61.14 76.02,59.79Q75.7,58.44 75.08,57.3Q74.45,56.15 73.41,55.22Q72.37,54.28 70.91,53.66Q69.46,53.03 69.25,52.2Q69.05,51.37 68.94,49.29Q68.84,47.21 68.63,46.9Q68.42,46.59 68.11,46.59Q67.8,46.59 66.55,47.53Q65.3,48.46 64.47,49.29Q63.64,50.12 62.81,51.37Q61.98,52.62 60.52,53.55Q59.06,54.49 58.02,55.64Q56.98,56.78 55.94,58.65Q54.9,60.52 53.97,63.85Q53.03,67.18 52.09,68.74Q51.16,70.29 49.81,71.65Q48.46,73.0 43.98,76.12Q39.51,79.24 36.7,81.73Q33.9,84.23 31.92,86.62Q29.95,89.01 29.02,90.68Q28.08,92.34 27.56,93.8Q27.04,95.25 26.73,96.81Q26.41,98.37 26.41,99.93Q26.41,101.49 26.82,103.05Q27.24,104.61 27.66,105.44Q28.08,106.27 29.12,107.41Q30.16,108.56 30.68,108.88Q31.2,109.19 32.24,109.5Q33.28,109.81 34.94,109.81Q36.6,109.81 37.53,109.6Q38.47,109.39 39.83,108.87Q41.18,108.35 42.01,107.83Q42.84,107.31 44.2,105.96Q45.55,104.61 46.38,103.16Q47.21,101.7 47.52,100.77Q47.83,99.83 47.94,98.27Q48.04,96.71 48.25,95.88Q48.46,95.04 49.09,94.52Q49.71,94.0 50.33,94.1Q50.95,94.21 51.37,94.62Q51.79,95.04 52.2,96.29Q52.62,97.54 52.72,100.66Q52.82,103.78 52.51,105.44Q52.2,107.11 51.78,108.35Q51.37,109.6 50.74,110.85Q50.12,112.1 49.49,113.03Q48.87,113.97 47.41,115.42Q45.96,116.88 44.09,117.92Q42.22,118.96 40.14,119.48Q38.06,120.0 35.46,120.0Q32.86,120.0 31.2,119.59Q29.53,119.17 28.29,118.55Q27.04,117.92 25.58,116.67Q24.12,115.42 23.09,114.07Q22.05,112.72 21.11,110.64Q20.17,108.56 19.86,107.11Q19.55,105.65 19.45,103.36Q19.34,101.07 19.45,100.97Q19.55,100.87 19.55,99.83Q19.55,98.79 19.66,98.69Q19.76,98.58 19.87,97.44Q19.97,96.29 20.8,93.38Q21.63,90.47 22.67,87.97Q23.71,85.48 24.54,83.81Q25.37,82.15 26.52,80.28Q27.66,78.41 40.87,60.0Q54.07,41.59 55.73,39.0Q57.4,36.4 58.34,34.22Q59.27,32.03 59.69,30.26Q60.1,28.49 60.31,26.52Q60.52,24.54 61.35,22.05Q62.18,19.55 63.33,17.47Q64.47,15.39 65.92,13.41Q67.38,11.44 67.79,9.25Q68.21,7.07 68.94,5.41Q69.67,3.74 70.61,2.39Q71.54,1.04 73.1,0.41Z";
+function markSVG(size, fg, bg, id){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Seattle Animal Shelter dog and cat mark"><path d="${MARK_PATH}" fill="${fg}" fill-rule="evenodd"/></svg>`;
+}
+function dogOnlySVG(size, fg, id){
+  const uid='d'+(id||Math.random().toString(36).slice(2,7));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Dog">
+    <mask id="${uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120">
+      <rect width="120" height="120" fill="#000"/>
+      <g transform="${DOG_TF}">
+        <path d="${DOG_BODY}" fill="#fff"/>
+        <circle cx="${DOG_EYE.cx}" cy="${DOG_EYE.cy}" r="${DOG_EYE.r}" fill="#000"/>
+      </g>
+    </mask>
+    <rect width="120" height="120" fill="${fg}" mask="url(#${uid})"/></svg>`;
+}
+function catOnlySVG(size, fg, id){
+  const uid='k'+(id||Math.random().toString(36).slice(2,7));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 120" role="img" aria-label="Cat">
+    <mask id="${uid}" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120">
+      <rect width="120" height="120" fill="#000"/>
+      <g transform="${CAT_SOLO_TF}">
+        <path d="${CAT_BODY}" fill="#fff"/>
+        <path d="${CAT_TAIL}" fill="#fff"/>
+        <circle cx="${CAT_EYE.cx}" cy="${CAT_EYE.cy}" r="${CAT_EYE.r}" fill="#000"/>
+      </g>
+    </mask>
+    <rect width="120" height="120" fill="${fg}" mask="url(#${uid})"/></svg>`;
+}
+
+/* ---- QR code, with the mark knocked out of the centre ---- */
+function qrSVG(text, px, kind){
+  if(typeof qrcode === 'undefined'){
+    return `<div style="text-align:center;padding:26px 12px">
+      ${markSVG(120,'var(--fir)','#fff','fb')}
+      <p class="small" style="margin-top:14px">The QR code needs an internet connection the first time it loads. Your record is safe either way.</p></div>`;
+  }
+  let qr;
+  try{ qr = qrcode(0,'H'); qr.addData(text); qr.make(); }
+  catch(e){ return `<p class="small">That link is too long to encode. Shorten the base URL under Record.</p>`; }
+
+  const n = qr.getModuleCount(), q = 3, tot = n + q*2, u = px/tot;
+  const cx = tot/2, clear = Math.ceil(n*0.22);
+  const inClear = (r,c) => Math.abs(r+q+0.5-cx) < clear/2+0.6 && Math.abs(c+q+0.5-cx) < clear/2+0.6;
+  const isFinder = (r,c) =>
+    (r<7 && c<7) || (r<7 && c>=n-7) || (r>=n-7 && c<7);
+
+  let dots = '';
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++){
+      if(!qr.isDark(r,c) || isFinder(r,c) || inClear(r,c)) continue;
+      const x = (c+q)*u, y = (r+q)*u;
+      dots += `<rect x="${(x+u*0.09).toFixed(2)}" y="${(y+u*0.09).toFixed(2)}" width="${(u*0.82).toFixed(2)}" height="${(u*0.82).toFixed(2)}" rx="${(u*0.3).toFixed(2)}"/>`;
+    }
+  }
+  const eye = (r,c) => {
+    /* Outer ring is exactly 1 module thick and sits inside the 7x7 cell,
+       so the stroke covers the ring rather than straddling its edge. */
+    const x=(c+q)*u, y=(r+q)*u;
+    return `<rect x="${(x+u/2).toFixed(2)}" y="${(y+u/2).toFixed(2)}" width="${(u*6).toFixed(2)}" height="${(u*6).toFixed(2)}" rx="${(u*0.55).toFixed(2)}" fill="none" stroke="var(--fir)" stroke-width="${u.toFixed(2)}"/>
+            <rect x="${(x+u*2).toFixed(2)}" y="${(y+u*2).toFixed(2)}" width="${(u*3).toFixed(2)}" height="${(u*3).toFixed(2)}" rx="${(u*0.4).toFixed(2)}" fill="var(--fir)"/>`;
+  };
+  /* The white plate must not spill past the modules we actually cleared. */
+  const plate = (clear+1)*u, art = plate*0.94;
+
+  return `<svg viewBox="0 0 ${px} ${px}" width="${px}" height="${px}" role="img" aria-label="QR code linking to this pet's shelter record">
+    <rect width="${px}" height="${px}" fill="#fff" rx="${(px*0.05).toFixed(0)}"/>
+    <g fill="var(--fir)">${dots}</g>
+    ${eye(0,0)}${eye(0,n-7)}${eye(n-7,0)}
+    <rect x="${((px-plate)/2).toFixed(2)}" y="${((px-plate)/2).toFixed(2)}" width="${plate.toFixed(2)}" height="${plate.toFixed(2)}" rx="${(u*1.6).toFixed(2)}" fill="#fff"/>
+    <g transform="translate(${((px-art)/2).toFixed(2)},${((px-art)/2).toFixed(2)}) scale(${(art/120).toFixed(4)})">
+      ${(kind==='cat'?catOnlySVG(120,'var(--fir)','q'+Math.random().toString(36).slice(2,6))
+         :kind==='dog'?dogOnlySVG(120,'var(--fir)','q'+Math.random().toString(36).slice(2,6))
+         :markSVG(120,'var(--fir)','#fff','qr'+Math.random().toString(36).slice(2,6))).replace(/<svg[^>]*>|<\/svg>/g,'')}
+    </g>
+  </svg>`;
+}
+/* The code has to open THIS app, not the shelter's website. When the file is
+   served over http(s) that is just its own URL, so scanning it anywhere opens
+   the folder. Opened straight off a disk there is no shareable URL, so the
+   code carries the pet's record as text instead and says so on screen. */
+function appURL(){
+  if(S.base && S.base.trim()) return S.base.trim() + (S.pet.id || '');
+  const l = location;
+  if(l.protocol === 'http:' || l.protocol === 'https:'){
+    return l.origin + l.pathname + (S.pet.id ? '#pet=' + encodeURIComponent(S.pet.id) : '');
+  }
+  return null;
+}
+function qrMode(){ return appURL() ? 'link' : 'record'; }
+function qrPayload(){
+  const u = appURL();
+  if(u) return u;
+  const p = S.pet;
+  return ['SEATTLE ANIMAL SHELTER — adoption record',
+    petName(), p.id?('Animal ID '+p.id):'', p.microchip?('Microchip '+p.microchip):'',
+    [p.breed,p.age,p.sex].filter(Boolean).join(', '),
+    'Rabies: '+({yes:'given at shelter',no:'NOT given',unknown:'unconfirmed'}[p.rabies]||'unconfirmed'),
+    S.owner.name?('Owner '+S.owner.name):'', S.owner.phone||'',
+    'Adopted '+fmtDate(adoptDate())
+  ].filter(Boolean).join('\n');
+}
+
+/* =============================================================
+   ROUTER
+   ============================================================= */
+function render(){
+  const root = $('#root');
+  let body;
+  if(S.screen === 'welcome')        body = viewWelcome();
+  else if(S.screen === 'setup')     body = viewSetup();
+  else if(S.screen === 'celebrate') body = viewCelebrate();
+  else if(S.screen === 'perks')     body = viewPerks();
+  else if(S.screen === 'review')    body = viewReview();
+  else if(S.screen === 'doc')       body = viewDoc(S.docId);
+  else                              body = viewApp();
+  /* The nav rides along on every stage except the celebration, which is
+     deliberately a full-bleed moment. */
+  root.innerHTML = (S.screen === 'celebrate' ? '' : navBar()) + body;
+  const sc = $('.screen');
+  if(sc) sc.addEventListener('scroll', () => {
+    const tb = $('.topbar'); if(tb) tb.classList.toggle('stuck', sc.scrollTop > 6);
+  }, {passive:true});
+  if(S.screen === 'celebrate') confetti();
+}
+
+/* =============================================================
+   WELCOME
+   ============================================================= */
+function viewWelcome(){
+  const reviewed = REVIEW.filter(([k])=>S.acks[k]).length;
+  return `<div class="screen">
+    <div class="pad" style="padding-top:calc(env(safe-area-inset-top) + 30px)">
+      <div style="text-align:center">
+        <div style="display:inline-block">${markSVG(76,'var(--fir)','#fff','w')}</div>
+        <p class="small" style="margin:14px 0 0;font-weight:600;color:var(--fir-3)">Seattle Animal Shelter</p>
+        <h1 style="margin-top:6px;font-size:30px">The whole folder, on your phone.</h1>
+        <p class="lede" style="margin-top:12px">All nine pages the shelter reviews with you, your pet's history, a plan for the first year, and the coupons — with nothing to print and nothing to lose.</p>
+      </div>
+
+      <div class="stack" style="margin-top:24px">
+        <button class="btn" data-a="start">Start the handoff${S.pet.shelterName?` for ${esc(S.pet.shelterName)}`:''}</button>
+        <button class="btn btn-2" data-a="browse">${ICON.book}<span>Just show me the nine documents</span></button>
+        ${S.started ? `<button class="btn btn-3" data-a="resume">Open the record I already made</button>` : ''}
+      </div>
+
+      <div class="sec-head"><h2>What is in the folder</h2><span class="small num">${reviewed}/${REVIEW.length} reviewed</span></div>
+      <div class="stack">${DOCS.map(docRow).join('')}</div>
+      <p class="small" style="margin-top:12px">Tap any page to read it now. Each one has a tick box at the bottom so you can mark it off as the shelter rep goes through it with you.</p>
+
+      <div class="qr-wrap" style="margin-top:26px">
+        ${qrSVG(qrPayload(), 240)}
+        <p class="small" style="text-align:center;margin:13px 0 0">${qrMode()==='link'
+          ? 'Scan to open this folder on any device. Shelter staff can scan the same code to match your pet at licensing, rabies or spay/neuter time.'
+          : 'Opened from a file, so there is no web address to point at yet — this code carries '+esc(petName())+"'s record as plain text, which any phone camera will read. Put the file on a web address and the code switches to opening the app itself."}</p>
+      </div>
+
+      <div class="eco" style="margin-top:22px">
+        <div class="row" style="align-items:flex-start;gap:11px">
+          <div style="color:#2F6B23;flex:none;width:20px">${ICON.leaf}</div>
+          <p class="small" style="margin:0;color:#31502A">Nine photocopied sheets in a manila folder, for every adoption, every year. This replaces the whole stack — no printing, no folder to lose in a drawer, and it is still on your phone when the rabies booster comes due.</p>
+        </div>
+      </div>
+      <div class="pad-b"></div>
+    </div>
+  </div>`;
+}
+
+/* =============================================================
+   SETUP WIZARD
+   ============================================================= */
+const STEPS = ['Shelter record','Name','Your home','Vet','First photo'];
+
+function viewSetup(){
+  const s = S.step;
+  return `<div class="topbar">
+    <div class="topbar-row">
+      <button class="back" data-a="back" aria-label="Go back">${ICON.chevL}</button>
+      <h1 style="font-size:19px">${STEPS[s]}</h1>
+      <span class="small num">${s+1}/5</span>
+    </div>
+  </div>
+  <div class="steps">${STEPS.map((_,i)=>`<i class="${i<=s?'on':''}"></i>`).join('')}</div>
+  <div class="screen"><div class="pad" style="padding-top:18px">${[stepPet,stepName,stepHome,stepVet,stepPhoto][s]()}<div class="pad-b"></div></div></div>`;
+}
+
+function stepPet(){
+  const p = S.pet;
+  return `<h2>What the shelter knows</h2>
+  <p class="lede" style="margin:8px 0 18px">Scanning the QR on your adoption paperwork fills this in. You can also type it from the printout.</p>
+  ${!p.id ? `<button class="btn btn-2" data-a="demo" style="margin-bottom:18px">${ICON.qr}<span>Fill from a sample shelter record</span></button>` : ''}
+  <div class="card">
+    <div class="grid-2">
+      <label class="f"><span>Shelter name</span><input class="inp" data-f="pet.shelterName" value="${esc(p.shelterName)}" placeholder="Yuzu"></label>
+      <label class="f"><span>Animal ID</span><input class="inp" data-f="pet.id" value="${esc(p.id)}" placeholder="A0061338302"></label>
+    </div>
+    <label class="f"><span>Microchip number</span><input class="inp" data-f="pet.microchip" value="${esc(p.microchip)}" inputmode="numeric" placeholder="941000032283309"></label>
+    <div class="grid-2">
+      <label class="f"><span>Species</span><select class="inp" data-f="pet.species"><option ${p.species==='Cat'?'selected':''}>Cat</option><option ${p.species==='Dog'?'selected':''}>Dog</option><option ${p.species==='Other'?'selected':''}>Other</option></select></label>
+      <label class="f"><span>Age</span><input class="inp" data-f="pet.age" value="${esc(p.age)}" placeholder="3 months"></label>
+    </div>
+    <label class="f"><span>Breed</span><input class="inp" data-f="pet.breed" value="${esc(p.breed)}" placeholder="Domestic Shorthair Mix"></label>
+    <div class="grid-2">
+      <label class="f"><span>Colour</span><input class="inp" data-f="pet.color" value="${esc(p.color)}" placeholder="Orange/White"></label>
+      <label class="f"><span>Sex</span><input class="inp" data-f="pet.sex" value="${esc(p.sex)}" placeholder="Male"></label>
+    </div>
+    <label class="f" style="margin-bottom:0"><span>Weight</span><input class="inp" data-f="pet.weight" value="${esc(p.weight)}" placeholder="1 kg"></label>
+  </div>
+
+  <h3 style="margin:24px 0 4px">Rabies vaccination</h3>
+  <p class="small" style="margin-bottom:11px">Copy this from the Public Health sheet in your folder — it decides whether a shot is on your to-do list.</p>
+  <div class="stack">
+    ${[['yes','Vaccinated at the shelter','Booster due in one year'],['no','Not vaccinated yet','You are responsible for getting it done'],['unknown','I need to check','We will keep it on your list until you confirm']]
+      .map(([v,t,d])=>`<button class="choice" data-set="pet.rabies" data-val="${v}" aria-pressed="${S.pet.rabies===v}"><span class="tick">${ICON.check}</span><span><b>${t}</b><em>${d}</em></span></button>`).join('')}
+  </div>
+
+  <h3 style="margin:24px 0 11px">Spayed or neutered</h3>
+  <div class="stack">
+    ${[['yes','Already altered','Most shelter pets come home this way'],['no','Not yet','The shelter clinic does this at low or no cost'],['unknown','I need to check','']]
+      .map(([v,t,d])=>`<button class="choice" data-set="pet.altered" data-val="${v}" aria-pressed="${S.pet.altered===v}"><span class="tick">${ICON.check}</span><span><b>${t}</b>${d?`<em>${d}</em>`:''}</span></button>`).join('')}
+  </div>
+
+  <label class="f" style="margin-top:22px"><span>Their story so far</span>
+    <textarea class="inp" data-f="pet.story" placeholder="What the shelter or foster told you about where they came from.">${esc(p.story)}</textarea>
+    <span class="hint">This is the part that gets lost when paperwork gets lost.</span>
+  </label>
+
+  <button class="btn" data-a="next" style="margin-top:8px">Continue</button>`;
+}
+
+function stepName(){
+  const p = S.pet, sn = p.shelterName || 'this pet';
+  return `<h2>What will you call ${esc(sn)}?</h2>
+  <p class="lede" style="margin:8px 0 20px">Plenty of people keep the shelter name. Plenty rename. Either way the shelter record keeps both, so a microchip lookup still works.</p>
+  <div class="stack">
+    <button class="choice" data-a="keepname" aria-pressed="${p.keepName}">
+      <span class="tick">${ICON.check}</span>
+      <span><b>Keep ${esc(sn)}</b><em>The name they already answer to</em></span>
+    </button>
+    <button class="choice" data-a="newname" aria-pressed="${!p.keepName}">
+      <span class="tick">${ICON.check}</span>
+      <span><b>Choose a new name</b><em>Use both for a week or so while they learn it</em></span>
+    </button>
+  </div>
+  ${!p.keepName ? `<label class="f" style="margin-top:18px"><span>Their new name</span>
+    <input class="inp" data-f="pet.name" value="${esc(p.name)}" placeholder="Type a name" autofocus>
+    <span class="hint">Shelter name ${esc(sn)} stays on the record either way.</span></label>` : ''}
+  <button class="btn" data-a="next" style="margin-top:20px">Continue</button>`;
+}
+
+function stepHome(){
+  const o = S.owner;
+  return `<h2>Where ${esc(petName())} lives now</h2>
+  <p class="lede" style="margin:8px 0 20px">This fills in the health-exam certificate, the licence application and the microchip transfer, so you only type it once.</p>
+  <div class="card">
+    <label class="f"><span>Your name</span><input class="inp" data-f="owner.name" value="${esc(o.name)}" placeholder="First and last name"></label>
+    <div class="grid-2">
+      <label class="f"><span>Phone</span><input class="inp" data-f="owner.phone" value="${esc(o.phone)}" type="tel" inputmode="tel" placeholder="(206) 555-0134"></label>
+      <label class="f"><span>ZIP</span><input class="inp" data-f="owner.zip" value="${esc(o.zip)}" inputmode="numeric" maxlength="5" placeholder="98119"></label>
+    </div>
+    <label class="f"><span>Email</span><input class="inp" data-f="owner.email" value="${esc(o.email)}" type="email" inputmode="email" placeholder="you@example.com"></label>
+    <label class="f"><span>Street address</span><input class="inp" data-f="owner.address" value="${esc(o.address)}" placeholder="2061 15th Ave W"></label>
+    <div class="grid-2" style="margin-bottom:0">
+      <label class="f" style="margin-bottom:0"><span>City</span><input class="inp" data-f="owner.city" value="${esc(o.city)}"></label>
+      <label class="f" style="margin-bottom:0"><span>State</span><input class="inp" data-f="owner.state" value="${esc(o.state)}" maxlength="2"></label>
+    </div>
+  </div>
+  <p class="small" style="margin-top:14px">Stored on this device only. Nothing is sent anywhere unless you share it yourself.</p>
+  <button class="btn" data-a="next" style="margin-top:16px">Continue</button>`;
+}
+
+function stepVet(){
+  const v = S.vet;
+  return `<h2>Who is your vet?</h2>
+  <p class="lede" style="margin:8px 0 20px">You have a free exam to use in the next seven days, so this is worth deciding today.</p>
+  <div class="stack">
+    <button class="choice" data-set="vet.mode" data-val="have" aria-pressed="${v.mode==='have'}">
+      <span class="tick">${ICON.check}</span><span><b>I already have a vet</b><em>Call and ask whether they take the WSVMA certificate</em></span></button>
+    <button class="choice" data-set="vet.mode" data-val="find" aria-pressed="${v.mode==='find'}">
+      <span class="tick">${ICON.check}</span><span><b>Help me find one near ${S.owner.zip ? esc(S.owner.zip) : 'me'}</b><em>Search WSVMA members and clinics in your ZIP</em></span></button>
+    <button class="choice" data-set="vet.mode" data-val="later" aria-pressed="${v.mode==='later'}">
+      <span class="tick">${ICON.check}</span><span><b>Not yet</b><em>It will stay near the top of your list</em></span></button>
+  </div>
+  ${v.mode==='have' ? `<div class="card" style="margin-top:18px">
+    <label class="f"><span>Clinic name</span><input class="inp" data-f="vet.name" value="${esc(v.name)}" placeholder="Ballard Animal Hospital"></label>
+    <label class="f"><span>Phone</span><input class="inp" data-f="vet.phone" value="${esc(v.phone)}" type="tel" inputmode="tel" placeholder="(206) 555-0177"></label>
+    <label class="f" style="margin-bottom:0"><span>Address</span><input class="inp" data-f="vet.address" value="${esc(v.address)}" placeholder="Street, city"></label>
+  </div>` : ''}
+  ${v.mode==='find' ? `<div class="stack" style="margin-top:18px">
+    <a class="btn btn-2" target="_blank" rel="noopener" href="https://wsvma.org">${ICON.ext}<span>WSVMA "Find a Veterinarian"</span></a>
+    <a class="btn btn-2" target="_blank" rel="noopener" href="https://www.google.com/maps/search/veterinarian+near+${encodeURIComponent(S.owner.zip||'Seattle WA')}">${ICON.pin}<span>Clinics near ${esc(S.owner.zip||'Seattle')}</span></a>
+    <p class="small">Always ask whether they accept the free exam certificate before you book.</p>
+  </div>` : ''}
+  <button class="btn" data-a="next" style="margin-top:20px">Continue</button>`;
+}
+
+function stepPhoto(){
+  const p = S.pet;
+  return `<h2>Day one</h2>
+  <p class="lede" style="margin:8px 0 20px">One photo of ${esc(petName())}, and one of the two of you together. In a year you will be glad this was the fussy step.</p>
+
+  <h3 style="margin-bottom:9px">${esc(petName())}</h3>
+  ${p.photo
+    ? `<img class="photo-preview" src="${p.photo}" alt="${esc(petName())}"><button class="btn btn-3" data-a="clearphoto" data-k="photo" style="margin-top:6px">Replace this photo</button>`
+    : `<button class="photo-drop" data-a="pick" data-k="photo">${ICON.cam}<b style="display:block;font-size:15px">Add their photo</b><span class="small">Camera or library</span></button>`}
+
+  <h3 style="margin:24px 0 9px">The two of you</h3>
+  ${p.dayOnePhoto
+    ? `<img class="photo-preview" src="${p.dayOnePhoto}" alt="First day together"><button class="btn btn-3" data-a="clearphoto" data-k="dayOnePhoto" style="margin-top:6px">Replace this photo</button>`
+    : `<button class="photo-drop" data-a="pick" data-k="dayOnePhoto">${ICON.heart}<b style="display:block;font-size:15px">Add your first-day photo</b><span class="small">Ask a staff member to take it</span></button>`}
+
+  <input type="file" accept="image/*" id="filein" class="hidden">
+  <button class="btn btn-gold" data-a="finish" style="margin-top:26px">${ICON.paw}<span>Complete the adoption</span></button>
+  <button class="btn btn-3" data-a="finish" style="margin-top:2px">Skip photos for now</button>`;
+}
+
+/* =============================================================
+   CELEBRATION
+   ============================================================= */
+function viewCelebrate(){
+  const d = adoptDate();
+  return `<div id="celebrate">
+    <div class="burst" id="burst" aria-hidden="true"></div>
+    <div class="cel-in">
+      <div class="cel-badge">${markSVG(76,'#fff','transparent','c')}</div>
+      <h1>${esc(petName())} is home.</h1>
+      <p class="lede">Adopted from the Seattle Animal Shelter on ${fmtDate(d)} at ${d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}. Every handout from the folder is now in your pocket, and it stays there.</p>
+      <div class="acts">
+        <button class="btn btn-gold" data-a="toperks">${ICON.gift}<span>Collect your perks</span></button>
+        <button class="btn btn-2" data-a="entered">Skip to the app</button>
+      </div>
+    </div>
+  </div>`;
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const b = $('#burst'); if(!b) return;
+  const cols = ['#F0B429','#FBE3A1','#5FA544','#FFFFFF','#E49B41','#7ED0C4','#1B75BB'];
+  let h = '';
+  for(let i=0;i<44;i++){
+    const dx = (Math.random()*180-90).toFixed(0), rot = (Math.random()*900-450).toFixed(0);
+    const dur = (2.4+Math.random()*2).toFixed(2), del = (Math.random()*1.3).toFixed(2);
+    const left = (Math.random()*100).toFixed(1), c = cols[i%cols.length];
+    const round = Math.random()>.6 ? 'border-radius:50%;height:9px' : '';
+    h += `<i class="conf" style="left:${left}%;background:${c};--dx:${dx}px;--rot:${rot}deg;${round};animation:fall ${dur}s ${del}s cubic-bezier(.25,.6,.5,1) forwards"></i>`;
+  }
+  b.innerHTML = h;
+}
+/* =============================================================
+   REVIEW — the in-person handoff at the counter. The rep walks each
+   page; the adopter confirms receipt; the rep signs and it is stamped.
+   ============================================================= */
+function viewReview(){
+  const done = REVIEW.filter(([k])=>S.acks[k]).length, all = done === REVIEW.length;
+  const pct = Math.round(done/REVIEW.length*100);
+  return `<div class="topbar"><div class="topbar-row">
+      <button class="back" data-a="closereview" aria-label="Back">${ICON.chevL}</button>
+      <h1 style="font-size:19px">Review together</h1>
+      <span class="small num">${done}/${REVIEW.length}</span>
+    </div></div>
+  <div class="screen"><div class="pad">
+    <p class="lede" style="margin:4px 0 16px">The shelter rep goes through each page with you. Tick them off as you go — this replaces the signature sheet in the folder.</p>
+    <div class="prog" style="margin-bottom:20px"><i style="width:${pct}%"></i></div>
+
+    <div class="stack">
+      ${REVIEW.map(([k,label,doc],i)=>`<div class="task ${S.acks[k]?'done':''}">
+        <button class="box" data-ack="${k}" aria-pressed="${S.acks[k]}" aria-label="Mark ${esc(label)} reviewed">${S.acks[k]?ICON.check:''}</button>
+        <div class="t-body">
+          <div class="t-title">${esc(label)}</div>
+          <div class="t-act">${doc
+            ? `<button data-doc="${doc}">${ICON.book}<span>Open the page</span></button>`
+            : k==='r1' ? `<button data-a="torecord">${ICON.file}<span>Open the record</span></button>`
+            : `<button data-a="toperks">${ICON.gift}<span>Open the coupons</span></button>`}</div>
+        </div></div>`).join('')}
+    </div>
+    ${!all?`<button class="btn btn-3 btn-s" data-a="ackall" style="width:100%;margin-top:12px">Mark all nine reviewed</button>`:''}
+
+    <div class="sec-head"><h2>Your confirmation</h2></div>
+    <div class="sig ${S.adopter.confirmedAt?'signed':''}">
+      ${S.adopter.confirmedAt ? `<div class="row" style="align-items:flex-start;gap:11px">
+          <span style="color:var(--ok);width:22px;flex:none">${ICON.check}</span>
+          <div><b style="font-size:14.5px">Receipt confirmed</b>
+          <p class="small" style="margin:5px 0 0">${esc(S.owner.name||'Adopter')} · ${fmtDateTime(new Date(S.adopter.confirmedAt))}</p></div>
+        </div>
+        <button class="btn btn-3 btn-s" data-a="unconfirm" style="margin-top:10px">Undo</button>`
+      : `<p class="small" style="margin:0 0 12px">Confirm that all nine pages were reviewed with you and that you have received them.</p>
+         ${!S.owner.name?`<label class="f"><span>Your name</span><input class="inp" data-f="owner.name" placeholder="Adopter name"></label>`:''}
+         <button class="btn btn-s" data-a="confirm" style="width:100%" ${all&&S.owner.name?'':'disabled'}>${ICON.check}<span>${all?'I have received all nine':`${REVIEW.length-done} still to review`}</span></button>`}
+    </div>
+
+    <div class="sec-head"><h2>Shelter sign-off</h2></div>
+    <div class="sig ${S.staff.signedAt?'signed':''}">
+      ${S.staff.signedAt ? `<div class="row" style="align-items:flex-start;gap:11px">
+          <span style="color:var(--ok);width:22px;flex:none">${ICON.shield}</span>
+          <div><b style="font-size:14.5px">Reviewed with the adopter</b>
+          <p class="small" style="margin:5px 0 0">${esc(S.staff.name)} · ${fmtDateTime(new Date(S.staff.signedAt))}</p>
+          <p class="small" style="margin:4px 0 0">${done} of ${REVIEW.length} pages confirmed at sign-off.</p></div>
+        </div>
+        <button class="btn btn-3 btn-s" data-a="unsign" style="margin-top:10px">Clear signature</button>`
+      : `<p class="small" style="margin:0 0 12px">Shelter staff or volunteer completing this adoption.</p>
+         <label class="f"><span>Your name</span><input class="inp" data-f="staff.name" value="${esc(S.staff.name)}" placeholder="Staff or volunteer name"></label>
+         <button class="btn btn-s" data-a="sign" style="width:100%" ${S.staff.name?'':'disabled'}>${ICON.check}<span>Confirm and time-stamp</span></button>`}
+    </div>
+
+    ${S.staff.signedAt && S.adopter.confirmedAt ? `<div class="eco" style="margin-top:22px">
+      <b style="font-size:15px">Nine sheets that did not get printed</b>
+      <p class="small" style="margin:6px 0 0">That is the whole folder, for this adoption, on a device the adopter already owns and will still have in a year.</p></div>` : ''}
+    <div class="pad-b"></div>
+  </div></div>`;
+}
+
+/* =============================================================
+   PERKS SCREEN — the payoff at the end of the handoff
+   ============================================================= */
+function viewPerks(){
+  return `<div class="topbar"><div class="topbar-row">
+      <button class="back" data-a="entered" aria-label="Skip">${ICON.x}</button>
+      <h1 style="font-size:19px">Before you go</h1>
+    </div></div>
+  <div class="screen"><div class="pad">
+    <h2 style="font-size:24px;letter-spacing:-.028em">Four things that are already yours</h2>
+    <p class="lede" style="margin:9px 0 20px">Two of them expire. They live in the Nearby tab from now on, so nothing here is lost if you close the app.</p>
+    <div class="stack">${PERKS.map(perkCard).join('')}</div>
+
+    <div class="sec-head"><h2>Pet shops near ${esc(S.owner.zip||'you')}</h2></div>
+    <div class="stack">${STORES.map(storeCard).join('')}</div>
+    <a class="btn btn-2" style="margin-top:12px" target="_blank" rel="noopener"
+       href="https://www.google.com/maps/search/pet+supply+store+near+${encodeURIComponent(S.owner.zip||'Seattle WA')}">${ICON.pin}<span>All pet shops near ${esc(S.owner.zip||'you')}</span></a>
+
+    <button class="btn" data-a="entered" style="margin-top:26px">${ICON.paw}<span>Start day one with ${esc(petName())}</span></button>
+    <div class="pad-b"></div>
+  </div></div>`;
+}
+function storeCard(st){
+  return `<a class="storecard" href="${st.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+    <span class="lg">${ICON.bowl}</span>
+    <span style="flex:1;min-width:0">
+      <b style="font-size:15px;display:block;letter-spacing:-.012em">${esc(st.name)}</b>
+      ${st.tag?`<span class="pill pill-gold" style="margin:5px 0 3px">${esc(st.tag)}</span>`:''}
+      <span class="small" style="display:block">${esc(st.note)}</span>
+    </span>
+    <span style="color:var(--muted);width:16px;flex:none">${ICON.ext}</span></a>`;
+}
+
+/* =============================================================
+   MAIN APP
+   ============================================================= */
+const TABS = [
+  ['start','Start','qr'], ['home','Home','home'], ['care','Folder','book'],
+  ['plan','Plan','checkbox'], ['nearby','Nearby','pin'], ['record','Record','file']
+];
+function navBar(){
+  const openCount = TASKS.filter(x=>!S.tasks[x.id] && dueDate(x.due) < Date.now()+3*DAY).length;
+  const cur = S.screen==='welcome' ? 'start'
+            : S.screen==='app' ? S.tab
+            : S.screen==='doc' ? 'care'
+            : S.screen==='review' ? 'record'
+            : S.screen==='perks' ? 'nearby' : '';
+  return `<nav class="nav" aria-label="Sections">
+    ${TABS.map(([id,label,ic])=>`<button data-tab="${id}" ${cur===id?'aria-current="page"':''}>
+      ${ICON[ic]}<span>${label}</span>${id==='plan'&&openCount?`<i class="dot"></i>`:''}</button>`).join('')}
+  </nav>`;
+}
+
+function viewApp(){
+  return {home:tabHome, care:tabCare, plan:tabPlan, nearby:tabNearby, record:tabRecord}[S.tab]();
+}
+
+function topbar(title, right=''){
+  return `<div class="topbar"><div class="topbar-row"><h1>${title}</h1>${right}</div></div>`;
+}
+
+/* ---------------- HOME ---------------- */
+function tabHome(){
+  const done = TASKS.filter(t=>S.tasks[t.id]).length, pct = Math.round(done/TASKS.length*100);
+  const next = TASKS.filter(t=>!S.tasks[t.id]).sort((a,b)=>a.due-b.due).slice(0,3);
+  const d = daysSince();
+  const p = S.pet;
+  return `${topbar('First Day')}
+  <div class="screen"><div class="pad">
+    <div class="pet-hero">
+      <div class="row">
+        ${p.photo ? `<img class="avatar" src="${p.photo}" alt="${esc(petName())}">`
+                  : `<div class="avatar avatar-ph">${ICON.paw}</div>`}
+        <div style="flex:1;min-width:0">
+          <h2>${esc(petName())}</h2>
+          <p class="small" style="margin:3px 0 0">${esc([p.breed,p.age].filter(Boolean).join(' · ')||'Seattle Animal Shelter')}</p>
+          ${p.name && p.shelterName && p.name!==p.shelterName ? `<p class="small" style="margin:2px 0 0">Shelter name: ${esc(p.shelterName)}</p>`:''}
+        </div>
+      </div>
+      <div class="daycount">
+        <b>${d===0?'Day one together':`Day ${d+1} together`}</b>
+        <span class="pill" style="background:rgba(255,255,255,.16);color:#fff">Adopted ${fmtDate(adoptDate())}</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <div class="row-between" style="margin-bottom:10px">
+        <b style="font-size:15px">Getting settled</b>
+        <span class="small num">${done} of ${TASKS.length}</span>
+      </div>
+      <div class="prog"><i style="width:${pct}%"></i></div>
+    </div>
+
+    ${REVIEW.some(([k])=>!S.acks[k]) ? `
+    <button class="card" data-a="review" style="width:100%;text-align:left;margin-top:14px;background:var(--marigold-2);border-color:#F1DFAF">
+      <div class="row" style="align-items:flex-start;gap:11px">
+        <span style="color:#8A6412;flex:none;width:20px">${ICON.checkbox}</span>
+        <span style="flex:1">
+          <b style="font-size:14.5px;display:block">Reviewing with the shelter?</b>
+          <span class="small" style="color:#6B5010;display:block;margin-top:4px">Tick off the nine pages as your rep goes through them, then confirm you have received everything.</span>
+        </span>
+        <span style="color:#8A6412;width:16px;flex:none">${ICON.chev}</span>
+      </div>
+    </button>` : ''}
+
+    <div class="sec-head"><h2>Next up</h2><button class="small" data-tab="plan" style="color:var(--sound);font-weight:600">See all</button></div>
+    <div class="stack">${next.length ? next.map(taskRow).join('') : `<div class="card"><b>Everything is done.</b><p class="small" style="margin:6px 0 0">Go and enjoy your cat.</p></div>`}</div>
+
+    <div class="sec-head"><h2>If something is wrong</h2></div>
+    <div class="qa">
+      <a class="urgent" href="tel:8884264435">${ICON.alert}<span>Poison control</span></a>
+      <a class="urgent" href="tel:5648884898">${ICON.phone}<span>24h vet</span></a>
+      <a href="tel:2063867387">${ICON.home}<span>Shelter</span></a>
+      ${S.vet.phone ? `<a href="tel:${esc(S.vet.phone.replace(/\D/g,''))}">${ICON.heart}<span>My vet</span></a>`
+                    : `<button data-tab="nearby">${ICON.search}<span>Find a vet</span></button>`}
+    </div>
+
+    <div class="sec-head"><h2>Yours to use</h2><button class="small" data-a="perks" style="color:var(--sound);font-weight:600">All perks</button></div>
+    <div class="stack">${PERKS.slice(0,2).map(perkCard).join('')}</div>
+
+    <div class="sec-head"><h2>Start here</h2></div>
+    <div class="stack">${DOCS.slice(0,2).map(docRow).join('')}</div>
+
+    <div class="card" style="margin-top:22px;background:var(--sound-2);border-color:#CFE0E8">
+      <div class="row" style="align-items:flex-start;gap:11px">
+        <div style="color:var(--sound);flex:none;width:20px">${ICON.qr}</div>
+        <div>
+          <b style="font-size:14.5px">Show this record to anyone</b>
+          <p class="small" style="margin:5px 0 11px;color:#2B5568">A vet, a sitter, or shelter staff at licensing time can scan the code and see ${esc(petName())}'s history.</p>
+          <button class="btn btn-2 btn-s" data-a="qr">Open the code</button>
+        </div>
+      </div>
+    </div>
+    <div class="pad-b"></div>
+  </div></div>`;
+}
+
+/* ---------------- CARE LIBRARY ---------------- */
+function tabCare(){
+  const cats = ['All', ...new Set(DOCS.map(d=>d.cat)), 'Watch', 'Links'];
+  const active = S.careCat || 'All';
+  let list = '';
+  if(active === 'Links'){
+    list = LINKS.map(g=>`<div class="sec-head"><h2>${g.g}</h2></div>
+      <div class="card link-list">${g.items.map(([t,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}${ICON.ext}</a>`).join('')}</div>`).join('');
+  } else if(active === 'Watch'){
+    list = `<p class="small" style="margin:16px 0 12px">These open a YouTube search rather than one fixed video, so the results stay current and nothing here ever goes dead.</p>
+      <div class="stack">${VIDEOS.map(v=>`<a class="doc-item" href="https://www.youtube.com/results?search_query=${encodeURIComponent(v.q)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit">
+        <span class="doc-ico" style="background:#FBE9E7;color:#C0392B">${ICON.play}</span>
+        <span style="flex:1"><b>${esc(v.t)}</b><span class="small">${esc(v.by)}</span></span>
+        <span style="color:var(--muted);width:16px;flex:none">${ICON.ext}</span></a>`).join('')}</div>`;
+  } else {
+    const shown = DOCS.filter(d => active==='All' || d.cat===active);
+    list = `<div class="stack" style="margin-top:16px">${shown.map(docRow).join('')}</div>`;
+  }
+  const revDone = REVIEW.filter(([k])=>S.acks[k]).length;
+  return `${topbar('The folder', `<button class="back" data-a="review" aria-label="Review together" style="width:auto;height:32px;padding:0 14px;border-radius:999px;font-size:12.5px;font-weight:600;gap:6px">${revDone}/${REVIEW.length} reviewed</button>`)}
+  <div class="chips">${cats.map(c=>`<button class="chip" data-cat="${c}" aria-pressed="${active===c}">${c}</button>`).join('')}</div>
+  <div class="screen"><div class="pad">${list}<div class="pad-b"></div></div></div>`;
+}
+function docRow(d){
+  return `<button class="doc-item" data-doc="${d.id}">
+    <span class="doc-ico">${ICON[d.icon]||ICON.book}</span>
+    <span style="flex:1;min-width:0"><b>${esc(d.title)}</b><span class="small">${esc(d.sub)} · ${d.mins} min read</span></span>
+    <span style="color:var(--muted);width:16px;flex:none">${ICON.chev}</span></button>`;
+}
+
+/* ---------------- DOC READER ---------------- */
+function viewDoc(id){
+  const d = DOCS.find(x=>x.id===id); if(!d) return viewApp();
+  const rev = REVIEW.find(r=>r[2]===id);
+  const html = d.body.map(b=>{
+    if(b.t==='h') return `<h3>${esc(b.v)}</h3>`;
+    if(b.t==='p') return `<p>${esc(b.v)}</p>`;
+    if(b.t==='l') return `<ul>${b.v.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+    if(b.t==='callout') return `<div class="callout ${b.style==='blue'?'blue':''}">${esc(b.v)}</div>`;
+    if(b.t==='zone') return `<div class="zone zone-${b.style}">${b.art?`<div class="art">${art(b.art,86)}</div>`:''}<h4>${esc(b.h)}</h4><p>${esc(b.p)}</p><dl>${b.d.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>`;
+    if(b.t==='chart') return `<div class="chart">${b.v.map(([pose,label,sub])=>
+        `<figure>${art(pose,72)}<figcaption>${esc(label)}${sub?`<em>${esc(sub)}</em>`:''}</figcaption></figure>`).join('')}</div>`;
+    if(b.t==='pose') return `<div class="pose">
+        <div class="top">${art(b.art,60)}<div><h5>${esc(b.h)}</h5><div class="sig">${esc(b.p)}</div></div></div>
+        <table>${b.d.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${esc(v)}</td></tr>`).join('')}</table></div>`;
+    if(b.t==='cert'){
+      const p=S.pet,o=S.owner;
+      const f=(k,v)=>`<div class="cf"><dt>${k}</dt><dd>${esc(v||'—')}</dd></div>`;
+      return `<div class="cert">
+        <h4>Certificate for a free health examination</h4>
+        <div class="issuer">Donated as a community service by the members of the Washington State Veterinary Medical Association, through the Washington State Animal Health Foundation.</div>
+        <dl>
+          ${f('Agency adopted from','Seattle Animal Shelter')}
+          ${f('Date adopted',fmtDate(adoptDate()))}
+          ${f('Pet name',petName())}
+          ${f('Breed',p.breed)}${f('Age',p.age)}${f('Sex',p.sex)}
+          ${f('Microchip no.',p.microchip)}
+          ${f('Owner',o.name)}${f('Phone',o.phone)}
+          ${f('Address',[o.address,o.city,o.state,o.zip].filter(Boolean).join(', '))}
+        </dl>
+        <div class="cut"><p class="tiny" style="margin:0">Valid for one physical examination during regular office hours with a participating WSVMA member veterinarian. Not valid for treatment, hospitalisation, vaccinations, emergency care or medication.</p></div>
+      </div>`;
+    }
+    if(b.t==='notice'){
+      const r=S.pet.rabies;
+      return `<div class="notice" style="background:var(--sound-2);border-color:#CFE0E8">
+        <b style="font-size:14.5px">Public Health — Seattle &amp; King County</b>
+        <p class="small" style="margin:5px 0 0;color:#2B5568">Your new pet has / has not received a rabies vaccination while at the Seattle Animal Shelter.</p>
+        <div class="haswrap">
+          <div class="hasbox ${r==='yes'?'on ok':''}"><b>HAS</b><span>Given at the shelter</span></div>
+          <div class="hasbox ${r==='no'?'on':''}"><b>HAS NOT</b><span>Your responsibility</span></div>
+        </div>
+        <p class="tiny" style="margin:0;color:#2B5568">${r==='unknown'?'Not yet recorded — set this under Record so your plan is accurate.':r==='yes'?'Booster due one year from the vaccination date.':'Arrange the vaccination with any vet or clinic. It is on your Plan.'}</p>
+      </div>`;
+    }
+    if(b.t==='profile'){
+      const p=S.pet;
+      const f=(k,v)=>v?`<div class="rec"><dt>${k}</dt><dd>${esc(v)}</dd></div>`:'';
+      return `<div class="profile">
+        <div class="ph">${p.photo?`<img class="avatar" style="width:56px;height:56px;border-radius:14px" src="${p.photo}" alt="">`:''}
+          <div><h4>Meet ${esc(petName())}</h4><div class="small">Animal ID ${esc(p.id||'—')}</div></div></div>
+        <div class="pb"><dl style="margin:0">
+          ${f('Shelter name',p.shelterName)}${f('Species',p.species)}${f('Breed',p.breed)}
+          ${f('Age at adoption',p.age)}${f('Sex',p.sex)}${f('Colour',p.color)}${f('Weight',p.weight)}
+          ${f('Microchip',p.microchip)}${f('Spayed / neutered',{yes:'Yes',no:'Not yet',unknown:'Needs checking'}[p.altered])}
+        </dl></div></div>`;
+    }
+    if(b.t==='story') return S.pet.story
+        ? `<h3>How they came to the shelter</h3><p>${esc(S.pet.story)}</p>`
+        : `<div class="callout">No shelter history saved yet. Ask your rep for it and add it under Record — it is the part that disappears if you lose the paperwork.</div>`;
+    if(b.t==='src') return `<div class="srcline">${esc(b.v)}${b.link?` <a href="${b.link}" target="_blank" rel="noopener">Open the original</a>`:''}</div>`;
+    return '';
+  }).join('');
+  return `<div class="topbar"><div class="topbar-row">
+      <button class="back" data-a="closedoc" aria-label="Back to care">${ICON.chevL}</button>
+      <h1 style="font-size:17px">${esc(d.cat)}</h1>
+    </div></div>
+    <div class="screen"><div class="pad" style="padding-top:10px">
+      <h1 style="font-size:27px;line-height:1.14">${esc(d.title)}</h1>
+      <p class="small" style="margin:9px 0 18px">${esc(d.sub)} · ${d.mins} minute read</p>
+      ${d.art?`<div class="doc-hero"><div class="art">${art(d.art,112)}</div></div>`:''}
+      <div class="reader">${html}</div>
+      ${rev?`<button class="reviewbar ${S.acks[rev[0]]?'on':''}" data-ack="${rev[0]}" style="width:100%;text-align:left">
+        <span class="box" style="${S.acks[rev[0]]?'background:var(--ok);border-color:var(--ok)':''}">${S.acks[rev[0]]?ICON.check:''}</span>
+        <span style="flex:1"><b style="font-size:14.5px;display:block">${S.acks[rev[0]]?'Reviewed at the shelter':'Mark as reviewed with me'}</b>
+        <span class="small">${S.acks[rev[0]]?'This page is checked off on your receipt':'Tap when the shelter rep has gone through this page with you'}</span></span>
+      </button>`:''}
+      <div class="pad-b" style="padding-bottom:40px"></div>
+    </div></div>`;
+}
+
+/* ---------------- PLAN ---------------- */
+function tabPlan(){
+  const done = TASKS.filter(t=>S.tasks[t.id]).length, pct = Math.round(done/TASKS.length*100);
+  return `${topbar('Plan')}
+  <div class="screen"><div class="pad">
+    <div class="card">
+      <div class="row-between" style="margin-bottom:10px">
+        <div><b style="font-size:15px">${done} of ${TASKS.length} done</b>
+        <p class="small" style="margin:3px 0 0">Dates are counted from ${fmtDate(adoptDate())}</p></div>
+        <span class="pill ${pct===100?'pill-ok':''}">${pct}%</span>
+      </div>
+      <div class="prog"><i style="width:${pct}%"></i></div>
+    </div>
+    ${PHASES.map(ph=>`
+      <div class="phase"><h3>${ph.label}</h3><span class="line"></span></div>
+      <p class="small" style="margin:-4px 0 11px">${ph.hint}</p>
+      <div class="stack">${TASKS.filter(t=>t.phase===ph.id).map(t=>taskRow(t,true)).join('')}</div>
+    `).join('')}
+    <div class="card" style="margin-top:24px">
+      <b style="font-size:15px">Put the whole year in your calendar</b>
+      <p class="small" style="margin:6px 0 12px">Downloads one file with every dated item, each with a reminder the day before.</p>
+      <button class="btn btn-2 btn-s" data-a="icsall">${ICON.cal}<span>Download all reminders</span></button>
+    </div>
+    <div class="pad-b"></div>
+  </div></div>`;
+}
+
+function taskRow(t, full){
+  const done = !!S.tasks[t.id], dl = dueLabel(t.due);
+  const acts = [];
+  if(t.doc) acts.push(`<button data-doc="${t.doc}">${ICON.book}<span>Read</span></button>`);
+  if(t.due>0) acts.push(`<button data-ics="${t.id}">${ICON.cal}<span>Remind me</span></button>`);
+  if(t.act && t.act.startsWith('dir:')){
+    const org = DIRECTORY.find(o=>o.id===t.act.slice(4));
+    if(org && org.tel) acts.push(`<a href="tel:${org.tel}">${ICON.phone}<span>Call</span></a>`);
+    if(org && org.url) acts.push(`<a href="${org.url}" target="_blank" rel="noopener">${ICON.ext}<span>Open</span></a>`);
+  }
+  if(t.act === 'photo') acts.push(`<button data-a="pick" data-k="dayOnePhoto">${ICON.cam}<span>Add photo</span></button>`);
+  if(t.act && t.act.startsWith('tab:')) acts.push(`<button data-tab="${t.act.slice(4)}">${ICON.pin}<span>Open</span></button>`);
+  if(t.act && t.act.startsWith('perk:')) acts.push(`<button data-a="perks">${ICON.gift}<span>Details</span></button>`);
+  return `<div class="task ${done?'done':''}">
+    <button class="box" data-check="${t.id}" aria-pressed="${done}" aria-label="Mark ${esc(t.t)} ${done?'not done':'done'}">${done?ICON.check:''}</button>
+    <div class="t-body">
+      <div class="t-title">${esc(t.t)}</div>
+      <div class="t-meta">
+        <span class="pill ${done?'pill-ok':dl.cls}">${done?'Done':dl.txt}</span>
+        ${t.hard&&!done?`<span class="pill pill-rust">Hard deadline</span>`:''}
+      </div>
+      ${full!==true && !done ? '' : `<p class="t-why">${esc(t.why)}</p>`}
+      ${done?'':`<div class="t-act">${acts.join('')}</div>`}
+    </div>
+  </div>`;
+}
+
+/* ---------------- NEARBY ---------------- */
+function tabNearby(){
+  const zip = S.owner.zip;
+  const groups = [...new Set(DIRECTORY.map(d=>d.cat))];
+  return `${topbar('Nearby')}
+  <div class="screen"><div class="pad">
+    <div class="card" style="margin-top:2px">
+      <b style="font-size:15px">Find a vet who takes your free exam</b>
+      <p class="small" style="margin:6px 0 12px">WSVMA cannot book for you. Search, then call and ask if they accept the certificate before you make the appointment.</p>
+      <label class="f"><span>Your ZIP code</span>
+        <input class="inp" data-f="owner.zip" value="${esc(zip)}" inputmode="numeric" maxlength="5" placeholder="98119"></label>
+      <div class="stack">
+        <a class="btn btn-2" target="_blank" rel="noopener" href="https://www.google.com/maps/search/veterinarian+near+${encodeURIComponent(zip||'Seattle WA')}">${ICON.pin}<span>Clinics near ${esc(zip||'you')}</span></a>
+        <a class="btn btn-2" target="_blank" rel="noopener" href="https://wsvma.org">${ICON.ext}<span>WSVMA member directory</span></a>
+      </div>
+    </div>
+
+    <div class="sec-head"><h2>Your vet</h2></div>
+    ${S.vet.name ? `<div class="dir">
+        <b>${esc(S.vet.name)}</b>
+        ${S.vet.address?`<div class="addr">${esc(S.vet.address)}</div>`:''}
+        <div class="dir-act">
+          ${S.vet.phone?`<a href="tel:${esc(S.vet.phone.replace(/\D/g,''))}">${ICON.phone}Call</a>`:''}
+          <a class="alt" data-a="editvet" href="javascript:void(0)">${ICON.pencil}Edit</a>
+        </div></div>`
+      : `<button class="card" data-a="editvet" style="width:100%;text-align:left">
+          <b style="font-size:15px">Save your vet's details</b>
+          <p class="small" style="margin:5px 0 0">One tap to call them, and they show up on the shared record.</p></button>`}
+
+    ${groups.map(g=>`<div class="sec-head"><h2>${g}</h2></div>
+      <div class="stack">${DIRECTORY.filter(d=>d.cat===g).map(dirCard).join('')}</div>`).join('')}
+
+    <div class="sec-head"><h2>Pet shops</h2></div>
+    <div class="stack">${STORES.map(storeCard).join('')}</div>
+    <a class="btn btn-2" style="margin-top:12px" target="_blank" rel="noopener"
+       href="https://www.google.com/maps/search/pet+supply+store+near+${encodeURIComponent(zip||'Seattle WA')}">${ICON.pin}<span>Pet shops near ${esc(zip||'you')}</span></a>
+
+    <div class="sec-head"><h2>Coupons and perks</h2></div>
+    <div class="stack">${PERKS.filter(p=>p.id==='mudbay'||p.id==='rover').map(perkCard).join('')}</div>
+    <div class="pad-b"></div>
+  </div></div>`;
+}
+function dirCard(o){
+  return `<div class="dir ${o.urgent?'urgent':''}">
+    <b>${esc(o.name)}</b>
+    ${o.addr?`<div class="addr">${esc(o.addr)}</div>`:''}
+    <div class="addr">${esc(o.note||'')}</div>
+    <div class="dir-act">
+      ${o.tel?`<a href="tel:${o.tel}">${ICON.phone}${fmtPhone(o.tel)}</a>`:''}
+      ${o.url?`<a class="alt" href="${o.url}" target="_blank" rel="noopener">${ICON.ext}Website</a>`:''}
+      ${o.email?`<a class="alt" href="mailto:${o.email}">${ICON.ext}Email</a>`:''}
+    </div></div>`;
+}
+function perkCard(p){
+  const dl = p.deadline ? dueLabel(p.deadline) : null;
+  return `<div class="perk">
+    <div class="perk-strip"></div>
+    <div class="row-between" style="align-items:flex-start">
+      <div style="flex:1">
+        <span class="pill ${p.code?'pill-gold':'pill-blue'}">${esc(p.kind)}</span>
+        <b style="display:block;font-size:16.5px;margin-top:9px;letter-spacing:-.018em">${esc(p.title)}</b>
+        <p class="small" style="margin:3px 0 0">${esc(p.by)}</p>
+      </div>
+    </div>
+    <p class="small" style="margin:11px 0 0;color:var(--ink-2)">${esc(p.body)}</p>
+    ${p.code?`<div class="code">${esc(p.code)}</div>`:''}
+    ${p.qr?`<div class="qr-pair">
+      <div class="qr-mini">${qrSVG('https://www.mudbay.com', 150, 'cat')}<b>Shop for cats</b></div>
+      <div class="qr-mini">${qrSVG('https://www.mudbay.com', 150, 'dog')}<b>Shop for dogs</b></div>
+    </div>
+    <p class="tiny" style="margin:9px 0 0;text-align:center">Show either code in store, or use ${esc(p.code)} online</p>`:''}
+    ${dl?`<p class="small" style="margin:11px 0 0"><span class="pill ${dl.cls}">${esc(p.deadlineLabel)} · ${dl.txt}</span></p>`:''}
+    <a class="btn btn-2 btn-s" style="margin-top:13px;width:100%" href="${p.action.url}" target="_blank" rel="noopener">${esc(p.action.label)}</a>
+  </div>`;
+}
+/* ---------------- RECORD ---------------- */
+function tabRecord(){
+  const p = S.pet, o = S.owner;
+  const ackDone = REVIEW.filter(([k])=>S.acks[k]).length;
+  const rabiesTxt = {yes:'Given at the shelter', no:'Not given — owner responsibility', unknown:'Needs checking'}[p.rabies];
+  const alterTxt  = {yes:'Yes', no:'Not yet', unknown:'Needs checking'}[p.altered];
+  return `${topbar('Record', `<button class="back" data-a="share" aria-label="Share record">${ICON.share}</button>`)}
+  <div class="screen"><div class="pad">
+
+    <div class="qr-wrap" style="margin-top:2px">
+      ${qrSVG(qrPayload(), 260)}
+      <p class="small" style="text-align:center;margin:13px 0 0">Animal ID ${esc(p.id||'not set')} · Microchip ${esc(p.microchip||'not set')}</p>
+      <p class="tiny" style="text-align:center;margin:7px 0 0">${qrMode()==='link'?'Opens this app':'Carries the record as text — host the file to make it open the app'}</p>
+    </div>
+
+    <div class="sec-head"><h2>${esc(petName())}</h2></div>
+    <div class="card"><dl style="margin:0">
+      ${[['Name now',p.name||p.shelterName],['Shelter name',p.shelterName],['Animal ID',p.id],['Microchip',p.microchip],
+         ['Species',p.species],['Breed',p.breed],['Colour',p.color],['Sex',p.sex],['Age at adoption',p.age],['Weight',p.weight],
+         ['Rabies',rabiesTxt],['Spayed / neutered',alterTxt],
+         ['Adopted from','Seattle Animal Shelter'],['Adoption date',fmtDateTime(adoptDate())]]
+        .filter(([,v])=>v).map(([k,v])=>`<div class="rec"><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}
+    </dl>
+    <button class="btn btn-2 btn-s" data-a="editpet" style="width:100%;margin-top:14px">${ICON.pencil}<span>Edit these details</span></button></div>
+
+    ${p.story ? `<div class="sec-head"><h2>Where they came from</h2></div>
+      <div class="card"><p class="reader" style="font-size:16px;margin:0">${esc(p.story)}</p></div>` : ''}
+
+    ${(p.photo||p.dayOnePhoto) ? `<div class="sec-head"><h2>Day one</h2></div>
+      <div class="${p.photo&&p.dayOnePhoto?'grid-2':''}">
+        ${p.photo?`<img class="photo-preview" src="${p.photo}" alt="${esc(petName())}">`:''}
+        ${p.dayOnePhoto?`<img class="photo-preview" src="${p.dayOnePhoto}" alt="First day together">`:''}
+      </div>` : ''}
+
+    <div class="sec-head"><h2>Home</h2></div>
+    <div class="card"><dl style="margin:0">
+      ${[['Adopter',o.name],['Phone',o.phone],['Email',o.email],
+         ['Address',[o.address,o.city,o.state,o.zip].filter(Boolean).join(', ')],
+         ['Vet',S.vet.name],['Vet phone',S.vet.phone]]
+        .filter(([,v])=>v).map(([k,v])=>`<div class="rec"><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('') || '<p class="small" style="margin:0">Nothing saved yet.</p>'}
+    </dl>
+    <button class="btn btn-2 btn-s" data-a="editowner" style="width:100%;margin-top:14px">${ICON.pencil}<span>Edit</span></button></div>
+
+    <div class="sec-head"><h2>Paperwork</h2><span class="small num">${ackDone}/${REVIEW.length}</span></div>
+    <button class="card" data-a="review" style="width:100%;text-align:left">
+      <div class="row-between">
+        <div style="flex:1">
+          <b style="font-size:15px">${ackDone===REVIEW.length?'All nine pages reviewed':'Review together'}</b>
+          <p class="small" style="margin:5px 0 0">${S.adopter.confirmedAt?`Receipt confirmed by ${esc(S.owner.name||'the adopter')}.`:'Everything that used to be in the manila folder.'} ${S.staff.signedAt?`Signed off by ${esc(S.staff.name)}.`:'Not yet signed off.'}</p>
+        </div>
+        <span style="color:var(--muted);width:16px;flex:none">${ICON.chev}</span>
+      </div>
+      <div class="prog" style="margin-top:12px"><i style="width:${Math.round(ackDone/REVIEW.length*100)}%"></i></div>
+    </button>
+
+    <div class="sec-head"><h2>Paper saved</h2></div>
+    <div class="eco">
+      <div class="eco-grid">
+        <div><div class="n">9</div><p class="small" style="margin:2px 0 0">sheets not printed for this adoption</p></div>
+        <div><div class="n">0</div><p class="small" style="margin:2px 0 0">folders to lose in a drawer</p></div>
+      </div>
+      <p class="small" style="margin:14px 0 0">Multiply by every adoption this year and it is a real line in the shelter's budget — plus a copier that is not jamming during a handoff, and an adopter who still has the rabies schedule on their phone eleven months from now.</p>
+    </div>
+
+    <div class="sec-head"><h2>Share and back up</h2></div>
+    <div class="stack">
+      <button class="btn btn-2" data-a="share">${ICON.share}<span>Share a summary with a vet or sitter</span></button>
+      <button class="btn btn-2" data-a="export">${ICON.file}<span>Download the full record</span></button>
+      <button class="btn btn-2" data-a="baseurl">${ICON.qr}<span>Change what the QR code points at</span></button>
+    </div>
+    <p class="small" style="margin-top:14px">Saved on this device. ${storeOK?'':'Storage is unavailable in this session, so download a copy before you close the tab. '}Download a copy if you are changing phones.</p>
+    <button class="btn btn-3 btn-s" data-a="reset" style="width:100%;margin-top:10px;color:var(--rust)">Start a new adoption record</button>
+    <div class="pad-b"></div>
+  </div></div>`;
+}
+
+/* =============================================================
+   SHEETS
+   ============================================================= */
+function sheet(html){
+  const w = document.createElement('div');
+  w.innerHTML = `<div class="sheet-bg" data-a="closesheet"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grabber"></div>${html}</div>`;
+  $('#app').append(...w.childNodes);
+}
+function closeSheet(){ document.querySelectorAll('.sheet,.sheet-bg').forEach(n=>n.remove()); }
+
+function sheetPerks(){
+  sheet(`<h2 style="margin-bottom:4px">Yours to use</h2>
+    <p class="small" style="margin-bottom:16px">Two of these expire. Do them this week.</p>
+    <div class="stack">${PERKS.map(perkCard).join('')}</div>`);
+}
+function sheetQR(){
+  sheet(`<h2 style="margin-bottom:14px">${esc(petName())}'s code</h2>
+    <div class="qr-wrap">${qrSVG(qrPayload(), 300)}</div>
+    <p class="small" style="margin-top:14px">Points to <span style="word-break:break-all">${esc(qrPayload())}</span></p>
+    <button class="btn btn-2" data-a="closesheet" style="margin-top:14px">Done</button>`);
+}
+function sheetEdit(kind){
+  const forms = {
+    vet: `<h2>Your vet</h2><p class="small" style="margin:6px 0 16px">Ask whether they accept the WSVMA free exam certificate.</p>
+      <label class="f"><span>Clinic name</span><input class="inp" data-f="vet.name" value="${esc(S.vet.name)}"></label>
+      <label class="f"><span>Phone</span><input class="inp" data-f="vet.phone" type="tel" inputmode="tel" value="${esc(S.vet.phone)}"></label>
+      <label class="f"><span>Address</span><input class="inp" data-f="vet.address" value="${esc(S.vet.address)}"></label>`,
+    owner: `<h2>Home details</h2><div style="margin-top:14px">
+      <label class="f"><span>Your name</span><input class="inp" data-f="owner.name" value="${esc(S.owner.name)}"></label>
+      <label class="f"><span>Phone</span><input class="inp" data-f="owner.phone" type="tel" value="${esc(S.owner.phone)}"></label>
+      <label class="f"><span>Email</span><input class="inp" data-f="owner.email" type="email" value="${esc(S.owner.email)}"></label>
+      <label class="f"><span>Address</span><input class="inp" data-f="owner.address" value="${esc(S.owner.address)}"></label>
+      <div class="grid-2"><label class="f"><span>City</span><input class="inp" data-f="owner.city" value="${esc(S.owner.city)}"></label>
+      <label class="f"><span>ZIP</span><input class="inp" data-f="owner.zip" inputmode="numeric" maxlength="5" value="${esc(S.owner.zip)}"></label></div></div>`,
+    pet: `<h2>Pet details</h2><div style="margin-top:14px">
+      <label class="f"><span>Name</span><input class="inp" data-f="pet.name" value="${esc(S.pet.name)}"></label>
+      <label class="f"><span>Shelter name</span><input class="inp" data-f="pet.shelterName" value="${esc(S.pet.shelterName)}"></label>
+      <label class="f"><span>Animal ID</span><input class="inp" data-f="pet.id" value="${esc(S.pet.id)}"></label>
+      <label class="f"><span>Microchip</span><input class="inp" data-f="pet.microchip" inputmode="numeric" value="${esc(S.pet.microchip)}"></label>
+      <label class="f"><span>Breed</span><input class="inp" data-f="pet.breed" value="${esc(S.pet.breed)}"></label>
+      <div class="grid-2"><label class="f"><span>Colour</span><input class="inp" data-f="pet.color" value="${esc(S.pet.color)}"></label>
+      <label class="f"><span>Sex</span><input class="inp" data-f="pet.sex" value="${esc(S.pet.sex)}"></label></div>
+      <div class="grid-2"><label class="f"><span>Age at adoption</span><input class="inp" data-f="pet.age" value="${esc(S.pet.age)}"></label>
+      <label class="f"><span>Weight</span><input class="inp" data-f="pet.weight" value="${esc(S.pet.weight)}"></label></div>
+      <label class="f"><span>Their story</span><textarea class="inp" data-f="pet.story">${esc(S.pet.story)}</textarea></label></div>`,
+    base: `<h2>QR destination</h2>
+      <p class="small" style="margin:6px 0 16px">By default the code points at wherever this app is being served from, so scanning it opens the folder. Leave this blank unless the shelter wants the code to resolve somewhere else — a record lookup in their own system, for example.</p>
+      <label class="f"><span>Base URL</span><input class="inp" data-f="base" value="${esc(S.base)}"></label>
+      <p class="small">Full link: <span style="word-break:break-all">${esc(qrPayload())}</span></p>`
+  };
+  sheet(`${forms[kind]}<button class="btn" data-a="savesheet" style="margin-top:10px">Save</button>`);
+}
+
+/* =============================================================
+   SHARE / EXPORT
+   ============================================================= */
+function summaryText(){
+  const p=S.pet,o=S.owner;
+  const L=[];
+  L.push(`${petName()} — adoption record`);
+  L.push(`Seattle Animal Shelter, adopted ${fmtDate(adoptDate())}`);
+  L.push('');
+  if(p.shelterName && p.shelterName!==p.name) L.push(`Shelter name: ${p.shelterName}`);
+  [['Animal ID',p.id],['Microchip',p.microchip],['Species',p.species],['Breed',p.breed],['Colour',p.color],
+   ['Sex',p.sex],['Age at adoption',p.age],['Weight',p.weight]].forEach(([k,v])=>{ if(v) L.push(`${k}: ${v}`); });
+  L.push(`Rabies: ${{yes:'given at the shelter',no:'NOT given at the shelter',unknown:'unconfirmed'}[p.rabies]}`);
+  L.push(`Spayed/neutered: ${{yes:'yes',no:'not yet',unknown:'unconfirmed'}[p.altered]}`);
+  L.push('');
+  if(o.name) L.push(`Owner: ${o.name}${o.phone?` · ${o.phone}`:''}`);
+  if(o.address) L.push(`Address: ${[o.address,o.city,o.state,o.zip].filter(Boolean).join(', ')}`);
+  if(S.vet.name) L.push(`Vet: ${S.vet.name}${S.vet.phone?` · ${S.vet.phone}`:''}`);
+  if(S.staff.signedAt) L.push(`\nDocuments reviewed by ${S.staff.name} on ${fmtDateTime(new Date(S.staff.signedAt))}.`);
+  L.push(`\n${qrPayload()}`);
+  return L.join('\n');
+}
+async function doShare(){
+  const text = summaryText();
+  if(navigator.share){
+    try{ await navigator.share({title:`${petName()} — adoption record`, text}); return; }catch(e){ if(e.name==='AbortError') return; }
+  }
+  try{ await navigator.clipboard.writeText(text); toast('Record copied to your clipboard'); }
+  catch(e){ sheet(`<h2>Record summary</h2><textarea class="inp" style="min-height:280px;font-size:13px;margin-top:12px">${esc(text)}</textarea><button class="btn" data-a="closesheet" style="margin-top:12px">Done</button>`); }
+}
+function doExport(){
+  const p=S.pet;
+  const rows = summaryText().split('\n').map(l=>l?`<p>${esc(l)}</p>`:'<br>').join('');
+  const tasks = TASKS.map(t=>`<li>${S.tasks[t.id]?'[x]':'[ ]'} ${esc(t.t)} — due ${fmtDate(dueDate(t.due))}</li>`).join('');
+  const acks  = REVIEW.map(([k,l])=>`<li>${S.acks[k]?'[x]':'[ ]'} ${esc(l)}</li>`).join('');
+  const html = `<!doctype html><meta charset="utf-8"><title>${esc(petName())} — adoption record</title>
+  <style>body{font-family:Georgia,serif;max-width:44em;margin:44px auto;padding:0 22px;line-height:1.55;color:#14201D}
+  h1{font-size:26px;margin:0 0 4px}h2{font-size:16px;margin:30px 0 8px;border-bottom:1px solid #ddd;padding-bottom:5px}
+  p{margin:0 0 5px}img{max-width:240px;border-radius:10px;margin:10px 10px 0 0}ul{padding-left:20px}li{margin-bottom:5px}
+  .m{color:#667;font-size:13px}</style>
+  <h1>${esc(petName())}</h1><p class="m">Seattle Animal Shelter adoption record · generated ${fmtDateTime(new Date())}</p>
+  ${p.photo?`<img src="${p.photo}">`:''}${p.dayOnePhoto?`<img src="${p.dayOnePhoto}">`:''}
+  <h2>Details</h2>${rows}
+  ${p.story?`<h2>Shelter history</h2><p>${esc(p.story)}</p>`:''}
+  <h2>Checklist</h2><ul>${tasks}</ul>
+  <h2>Documents received</h2><ul>${acks}</ul>`;
+  download(new Blob([html],{type:'text/html'}), `${petName().toLowerCase().replace(/[^a-z0-9]+/g,'-')}-adoption-record.html`);
+  toast('Record downloaded');
+}
+function icsAll(){
+  const dt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const ev = TASKS.filter(t=>t.due>0 && !S.tasks[t.id]).map((t,i)=>{
+    const d = dueDate(t.due); d.setHours(10,0,0,0);
+    return ['BEGIN:VEVENT','UID:'+Date.now()+i+'@firstday','DTSTAMP:'+dt(new Date()),'DTSTART:'+dt(d),'DTEND:'+dt(new Date(d.getTime()+3600000)),
+      'SUMMARY:'+petName()+' — '+t.t.replace(/[,;]/g,''),'DESCRIPTION:'+t.why.replace(/[,;]/g,''),
+      'BEGIN:VALARM','TRIGGER:-P1D','ACTION:DISPLAY','DESCRIPTION:'+t.t.replace(/[,;]/g,''),'END:VALARM','END:VEVENT'].join('\r\n');
+  }).join('\r\n');
+  download(new Blob(['BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//First Day//EN\r\n'+ev+'\r\nEND:VCALENDAR'],{type:'text/calendar'}), 'first-year-reminders.ics');
+  toast('Calendar file downloaded');
+}
+/* =============================================================
+   EVENTS
+   ============================================================= */
+function setPath(path, val){
+  const parts = path.split('.');
+  if(parts.length===1) S[parts[0]] = val;
+  else S[parts[0]][parts[1]] = val;
+  save();
+}
+
+/* Buttons gated on a text field have to unlock as you type — re-rendering
+   the whole screen here would blur the input mid-word. */
+function refreshGates(){
+  const sign = document.querySelector('[data-a="sign"]');
+  if(sign) sign.disabled = !(S.staff.name||'').trim();
+  const conf = document.querySelector('[data-a="confirm"]');
+  if(conf) conf.disabled = !((S.owner.name||'').trim() && REVIEW.every(([k])=>S.acks[k]));
+}
+document.addEventListener('input', e => {
+  const f = e.target.closest('[data-f]'); if(!f) return;
+  setPath(f.dataset.f, f.value);
+  const live = document.querySelector('.sheet .small span');
+  if(f.dataset.f === 'base' && live) live.textContent = qrPayload();
+  refreshGates();
+});
+
+document.addEventListener('change', e => {
+  if(e.target.id === 'filein' && e.target.files[0]){
+    const key = e.target.dataset.k || 'photo';
+    readPhoto(e.target.files[0], data => { S.pet[key] = data; save(); render(); toast('Photo saved'); });
+    e.target.value = '';
+  }
+});
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-a],[data-tab],[data-doc],[data-cat],[data-check],[data-ack],[data-ics],[data-set]');
+  if(!t) return;
+  const a = t.dataset;
+
+  /* nav */
+  if(a.tab){
+    if(a.tab === 'start'){ S.screen='welcome'; save(); render(); const w=$('.screen'); if(w) w.scrollTop=0; return; }
+    S.tab = a.tab; S.screen='app'; save(); render(); const sc=$('.screen'); if(sc) sc.scrollTop=0; return;
+  }
+  if(a.doc){ S.docFrom = (S.screen==='review'||S.screen==='welcome') ? S.screen : 'app'; S.docId = a.doc; S.screen='doc'; render(); return; }
+  if(a.cat){ S.careCat = a.cat; render(); return; }
+
+  /* toggles */
+  if(a.check){ S.tasks[a.check] = !S.tasks[a.check]; save(); render();
+    if(S.tasks[a.check]) toast(TASKS.filter(x=>S.tasks[x.id]).length===TASKS.length ? 'Every item done. Nicely handled.' : 'Done'); return; }
+  if(a.ack){ S.acks[a.ack] = !S.acks[a.ack]; save(); render();
+    if(S.acks[a.ack] && REVIEW.every(([k])=>S.acks[k])) toast('All nine pages reviewed'); return; }
+  if(a.set){ setPath(a.set, a.val); render(); return; }
+  if(a.ics){
+    const task = TASKS.find(x=>x.id===a.ics); const d = dueDate(task.due); d.setHours(10,0,0,0);
+    ics(`${petName()} — ${task.t}`, d, task.why); return;
+  }
+
+  switch(a.a){
+    case 'start':
+      if(!S.adoptedAt) S.adoptedAt = Date.now();
+      S.screen='setup'; S.step=0; S.started=true; save(); render(); break;
+    case 'resume': S.screen='app'; S.tab='home'; render(); break;
+    case 'browse':
+      if(!S.adoptedAt) S.adoptedAt = Date.now();
+      S.started = true; S.screen='app'; S.tab='care'; S.careCat='All'; save(); render(); break;
+    case 'demo':
+      /* Sample record, transcribed from a real Seattle Animal Shelter profile sheet */
+      Object.assign(S.pet, { shelterName:'Yuzu', name:'', id:'A0061338302', microchip:'941000032283309',
+        species:'Cat', age:'3 months', sex:'Male, altered', weight:'1 kg', breed:'Domestic Shorthair Mix',
+        color:'Orange/White', altered:'yes', rabies:'no',
+        story:'Yuzu came into the shelter a bit banged up and scared, and it took time and a lot of Churu to calm him down — a very tiny guy who had clearly been through an ordeal before someone scooped him into safety. Within hours in foster care he turned curious and brave. He was hungry, thirsty, dirty, and had no idea what toys were. He is now a friendly, silly, clean kitten who races around chasing toys, soaking up sunbeams, prowling the back of the couch and sneaking up on the resident adult cats for any attention they will give him. He won both of them over, and he is very good at reading their signals while encouraging them to love on him.' });
+      save(); render(); toast('Sample shelter record loaded'); break;
+    case 'next':
+      if(S.step < 4){ S.step++; render(); $('.screen').scrollTop=0; }
+      break;
+    case 'back':
+      if(S.step > 0){ S.step--; render(); } else { S.screen='welcome'; render(); }
+      break;
+    case 'keepname': S.pet.keepName = true; S.pet.name = ''; save(); render(); break;
+    case 'newname':  S.pet.keepName = false; save(); render(); setTimeout(()=>{ const i=document.querySelector('[data-f="pet.name"]'); if(i) i.focus(); },30); break;
+    case 'pick': { const fi = document.getElementById('filein') || (()=>{ const n=document.createElement('input'); n.type='file'; n.accept='image/*'; n.id='filein'; n.className='hidden'; document.body.append(n); return n; })();
+      fi.dataset.k = a.k || 'photo'; fi.click(); break; }
+    case 'clearphoto': S.pet[a.k]=''; save(); render(); break;
+    case 'finish':
+      S.tasks.photo = !!(S.pet.photo || S.pet.dayOnePhoto);
+      S.screen='celebrate'; save(); render(); break;
+    case 'toperks': S.screen='perks'; save(); render(); break;
+    case 'review': S.screen='review'; save(); render(); break;
+    case 'torecord': S.screen='app'; S.tab='record'; save(); render(); break;
+    case 'closereview': S.screen='app'; S.tab='record'; render(); break;
+    case 'confirm':
+      if(!S.owner.name || REVIEW.some(([k])=>!S.acks[k])) return;
+      S.adopter.confirmedAt = Date.now(); save(); render(); toast('Receipt confirmed'); break;
+    case 'unconfirm': S.adopter.confirmedAt=''; save(); render(); break;
+    case 'entered': S.screen='app'; S.tab='home'; save(); render(); break;
+    case 'tab-record': S.screen='app'; S.tab='record'; save(); render(); break;
+    case 'closedoc': S.screen = (S.docFrom==='review'||S.docFrom==='welcome') ? S.docFrom : 'app'; render(); break;
+    case 'perks': sheetPerks(); break;
+    case 'qr': sheetQR(); break;
+    case 'editvet': sheetEdit('vet'); break;
+    case 'editowner': sheetEdit('owner'); break;
+    case 'editpet': sheetEdit('pet'); break;
+    case 'baseurl': sheetEdit('base'); break;
+    case 'savesheet': closeSheet(); render(); toast('Saved'); break;
+    case 'closesheet': closeSheet(); break;
+    case 'ackall': REVIEW.forEach(([k])=>S.acks[k]=true); save(); render(); toast('All nine marked reviewed'); break;
+    case 'sign':
+      if(!S.staff.name) return;
+      S.staff.signedAt = Date.now(); save(); render(); toast('Sign-off recorded'); break;
+    case 'unsign': S.staff.signedAt=''; save(); render(); break;
+    case 'share': doShare(); break;
+    case 'export': doExport(); break;
+    case 'icsall': icsAll(); break;
+    case 'reset':
+      sheet(`<h2>Start a new record?</h2>
+        <p class="lede" style="margin:10px 0 18px">This clears ${esc(petName())}'s details, photos and checklist from this device. Download a copy first if you want to keep it.</p>
+        <div class="stack">
+          <button class="btn btn-2" data-a="export">Download a copy first</button>
+          <button class="btn" style="background:var(--rust)" data-a="reset2">Clear and start over</button>
+          <button class="btn btn-3" data-a="closesheet">Cancel</button>
+        </div>`); break;
+    case 'reset2':
+      S = JSON.parse(JSON.stringify(BLANK));
+      try{ window.storage.delete('firstday:record'); }catch(err){}
+      closeSheet(); render(); toast('Cleared'); break;
+  }
+});
+
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
+
+/* =============================================================
+   INIT
+   ============================================================= */
+/* Installable, and offline after the first open. The manifest is inline so the
+   app stays one file; sw.js is optional and only used if it sits alongside. */
+(function(){
+  const icon = 'data:image/svg+xml,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="24" fill="#0D5350"/><g transform="translate(14,14) scale(0.766)"><path d="${MARK_PATH}" fill="#fff" fill-rule="evenodd"/></g></svg>`);
+  const manifest = {
+    name:'First Day — Seattle Animal Shelter', short_name:'First Day',
+    start_url:'.', scope:'.', display:'standalone',
+    background_color:'#F1F4EF', theme_color:'#0D5350',
+    description:'Your adoption folder, on your phone.',
+    icons:[{src:icon, sizes:'any', type:'image/svg+xml', purpose:'any maskable'}]
+  };
+  const l = document.createElement('link');
+  l.rel = 'manifest';
+  l.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+  document.head.appendChild(l);
+  const t = document.createElement('link');
+  t.rel = 'apple-touch-icon'; t.href = icon; document.head.appendChild(t);
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* fine without it */ });
+  }
+})();
+
+(async function(){
+  await load();
+  if(S.started && S.screen === 'setup') S.screen = 'app';
+  const m = location.hash.match(/pet=([^&]+)/);
+  if(m && !S.pet.id) S.pet.id = decodeURIComponent(m[1]);
+  render();
+})();
+</script>
+</body>
+</html>
